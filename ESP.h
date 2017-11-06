@@ -2,6 +2,10 @@
 
 #include "Hacks.h"
 
+extern float lineLBY;
+extern float lineRealAngle;
+extern float lineFakeAngle;
+
 class CEsp : public CHack
 {
 public:
@@ -18,7 +22,7 @@ private:
 		int x, y, w, h;
 	};
 
-	void DrawPlayer(IClientEntity* pEntity, player_info_t pinfo);
+	void DrawPlayer(IClientEntity* pEntity, player_info_t pinfo, bool bSendpacket, CUserCmd *pCmd);
 
 	Color GetPlayerColor(IClientEntity* pEntity);
 	void Corners(CEsp::ESPBox size, Color color, IClientEntity * pEntity);
@@ -36,7 +40,7 @@ private:
 	void DrawInfo(IClientEntity* pEntity, ESPBox size);
 	void DrawCross(IClientEntity* pEntity);
 	void DrawSkeleton(IClientEntity* pEntity);
-	void DrawLinesAA();
+	//void DrawLinesAA(Color color);
 
 	void IsPlayerDefusing(player_info_t pinfo, CEsp::ESPBox size, IClientEntity * pEntity);
 

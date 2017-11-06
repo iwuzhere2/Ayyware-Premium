@@ -145,6 +145,7 @@
     <ClInclude Include="GUI.h" />
     <ClInclude Include="Hacks.h" />
     <ClInclude Include="hitmarker.h" />
+    <ClInclude Include="LagComp.h" />
     <ClInclude Include="nospread.h" />
     <ClInclude Include="Proxies.h" />
     <ClInclude Include="Resolver.h" />
@@ -178,6 +179,7 @@
   <ItemGroup>
     <ClCompile Include="AntiAntiAim.cpp" />
     <ClCompile Include="Autowall.cpp" />
+    <ClCompile Include="Backtrack.cpp" />
     <ClCompile Include="Chams.cpp" />
     <ClCompile Include="checksum_md5.cpp" />
     <ClCompile Include="Controls.cpp" />

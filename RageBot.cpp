@@ -285,10 +285,6 @@ void CRageBot::DoAimbot(CUserCmd *pCmd, bool &bSendPacket)
 			{
 				if (AimAtPoint(pLocal, Point, pCmd, bSendPacket, pWeapon))
 				{
-					if (Menu::Window.RageBotTab.AccuracySpread.GetState())
-					{
-						backtracking->RunLBYBackTrack(tick, pCmd, Point);
-					}
 					if (Menu::Window.RageBotTab.AimbotAutoFire.GetState() && !(pCmd->buttons & IN_ATTACK))
 					{
 						pCmd->buttons |= IN_ATTACK;
@@ -888,14 +884,24 @@ namespace AntiAims
 	void fakeLBYDMG(CUserCmd *pCmd, bool &bSendPacket)
 	{
 		IClientEntity* LocalPlayer = hackManager.pLocal();
-		if (LocalPlayer->GetFlags() & FL_ONGROUND && pCmd->viewangles.y != 36)
+		float angle;
+		angle = rand() % 34 + 1;
+		bool flipy;
+		if (LocalPlayer->GetFlags() & FL_ONGROUND)
 		{
-			pCmd->viewangles.y = 0.f;
-			pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + 36.f;
+			if (flipy)
+			{
+				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + angle + 180.f;
+			}
+			if (!flipy)
+			{
+				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() - angle + 180.f;
+			}
+			flipy = !flipy;
 		}
-		else if (pCmd->viewangles.y = 36)
+		else
 		{
-			pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() - 34.f;
+			pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() - angle;
 		}
 	}
 

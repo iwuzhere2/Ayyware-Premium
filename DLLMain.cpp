@@ -18,6 +18,13 @@
 
 extern HINSTANCE hAppInstance;
 
+float lineLBY;
+float lineRealAngle;
+float lineFakeAngle;
+int ResolverStage[65];
+bool canBacktrack;
+bool BacktrackCanShotEnemy;
+
 
 UCHAR szFileSys[255], szVolNameBuff[255];
 DWORD dwMFL, dwSysFlags;

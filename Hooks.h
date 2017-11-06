@@ -2,6 +2,7 @@
 
 extern bool DoUnload;
 extern bool bGlovesNeedUpdate;
+extern int ResolverStage[65];
 
 #include "Utilities.h"
 
@@ -20,6 +21,10 @@ namespace Hooks
 	extern Utilities::Memory::VMTManager VMTRenderView;
 	extern Utilities::Memory::VMTManager VMTEventManager;
 };
+
+extern float lineLBY;
+extern float lineRealAngle;
+extern float lineFakeAngle;
 
 namespace Resolver
 {

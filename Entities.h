@@ -16,6 +16,8 @@
 
 #define TIME_TO_TICKS( dt )		( (int)( 0.5f + (float)(dt) / TICK_INTERVAL ) )
 
+#define XorStr( s ) ( s )
+
 class IClientRenderable;
 class IClientNetworkable;
 class IClientUnknown;
@@ -633,6 +635,12 @@ public:
 	virtual void				Release() = 0;
 };
 
+
+
+
+
+
+
 class __declspec (novtable)IClientEntity : public IClientUnknown, public IClientRenderable, public IClientNetworkable, public IClientThinkable
 {
 public:
@@ -683,6 +691,97 @@ public:
 	CNETVAR_FUNC(float, GetSimulationTime, 0xC4560E44); //m_flSimulationTime
 	CNETVAR_FUNC(float, GetAnimTime, 0xD27E8416);
 	CNETVAR_FUNC(bool, IsScoped, 0x61B9C22C); //m_bIsScoped
+
+	//-------------------------NEW
+
+	Vector getAbsOriginal()
+	{
+		typedef Vector&(__thiscall *o_getAbsOriginal)(void*);
+		return call_vfunc<o_getAbsOriginal>(this, 10)(this);
+	}
+
+	Vector getAbsAechse()
+	{
+		typedef Vector&(__thiscall *o_getAbsAechse)(void*);
+		return call_vfunc<o_getAbsAechse>(this, 11)(this);
+	}
+
+	void updateClientSideAnimation()
+	{
+		typedef void(__thiscall *o_updateClientSideAnimation)(void*);
+		call_vfunc<o_updateClientSideAnimation>(this, 218)(this);
+	}
+
+	void setAbsOriginal(Vector origin) // 55 8B EC 83 E4 F8 51 53 56 57 8B F1
+	{
+		using SetAbsOriginFn = void(__thiscall*)(void*, const Vector &origin);
+		static SetAbsOriginFn SetAbsOrigin;
+
+		if (!SetAbsOrigin)                                                           // ("client.dll", (PBYTE)"\x55\x8B\xEC\x83\xE4\xF8\x51\x53\x56\x57\x8B\xF1\xE8\x00\x00", "xxxxxxxxxxxxx??");
+			SetAbsOrigin = (SetAbsOriginFn)(Utilities::Memory::FindPattern("client.dll", (PBYTE)"\x55\x8B\xEC\x83\xE4\xF8\x51\x53\x56\x57\x8B\xF1\xE8\x00\x00", "xxxxxxxxxxxxx??"));
+
+		SetAbsOrigin(this, origin);
+	}
+	
+	void setAbsAechse(Vector aechse)
+	{
+		using SetAbsAnglesFn = void(__thiscall*)(IClientEntity*, const Vector &angles);
+		static SetAbsAnglesFn SetAbsAngles;
+
+		if (!SetAbsAngles)
+			SetAbsAngles = (SetAbsAnglesFn)(Utilities::Memory::FindPattern("client.dll", (BYTE*)"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x64\x53\x56\x57\x8B\xF1\xE8", "xxxxxxxxxxxxxxx"));
+
+		SetAbsAngles(this, aechse);
+
+	}
+	float getPoseParamsReal(int idx)
+	{
+		static int offsPoseParam = GET_NETVAR(XorStr("CBaseAnimating"), XorStr("m_flPoseParameter"));
+		return *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + offsPoseParam + sizeof(float) * idx);
+	}
+
+	float getCycle()
+	{
+		return *(float*)((DWORD)this + 0xA14);
+	}
+	int getSequence()
+	{
+		return *(int*)((DWORD)this + 0x28AC);
+	}
+	float getPoseParams(int idx)
+	{
+		return *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x2764 + sizeof(float) * idx);
+	}
+	float getPoseParams1()
+	{
+		return *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + 0x2764 + sizeof(float));
+	}
+/*	std::array<float, 24> GetPoseParameters() {
+		return *(std::array<float, 24>*)((uintptr_t)this + 0x2764); // + m_flPoseParameter
+	}
+
+	void SetPoseParameters(std::array<float, 24> arr) {
+		*(std::array<float, 24>*)((uintptr_t)this + 0x2764) = arr; // +m_flPoseParameter
+	}*/
+
+
+
+
+
+
+	//-------------------------OLD
+
+
+
+
+
+
+	void SetAngle2(Vector wantedang)
+	{
+		typedef void(__thiscall* SetAngleFn)(void*, const Vector &);
+		static SetAngleFn SetAngle2 = (SetAngleFn)((DWORD)Utilities::Memory::FindPattern("client.dll", (BYTE*)"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x64\x53\x56\x57\x8B\xF1", "xxxxxxxxxxxxxx"));
+		SetAngle2(this, wantedang);
+	}
 
 	bool IsAlive()
 	{

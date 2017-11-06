@@ -942,6 +942,11 @@ void CMiscTab::Setup()
 
 	OtherCircleButton.SetFileId("otr_circlestrafebutton");
 	OtherGroup.PlaceLabledControl("Circle Key", this, &OtherCircleButton);
+	
+	OtherCircleSlider.SetFileId("otr_circlestrafeslider");
+	OtherCircleSlider.SetBoundaries(1.1f, 5.f);
+	OtherCircleSlider.SetValue(2.f);
+	OtherGroup.PlaceLabledControl("Circle strafe radius", this, &OtherCircleSlider);
 
 	OtherSlowMotion.SetFileId("otr_slowmotionbutton");
 	OtherGroup.PlaceLabledControl("Slow Motion", this, &OtherSlowMotion);

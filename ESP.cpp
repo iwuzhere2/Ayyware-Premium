@@ -2,6 +2,8 @@
 #include "Interfaces.h"
 #include "RenderManager.h"
 #include "GlowManager.h"
+#include "Chams.h"
+#include "Hooks.h"
 
 DWORD GlowManager = *(DWORD*)(Utilities::Memory::FindPatternV2("client.dll", "0F 11 05 ?? ?? ?? ?? 83 C8 01 C7 05 ?? ?? ?? ?? 00 00 00 00") + 3);
 
@@ -24,30 +26,6 @@ DWORD GlowManager = *(DWORD*)(Utilities::Memory::FindPatternV2("client.dll", "0F
 #endif
 
 
-void CEsp::BulletTrace(IClientEntity* pEntity)
-{
-	Vector src3D, dst3D, forward, src, dst;
-	trace_t tr;
-	Ray_t ray;
-	CTraceFilter filter;
-
-	AngleVectors(pEntity->GetEyeAngles(), &forward);
-	filter.pSkip = pEntity;
-	src3D = pEntity->GetBonePos(6) - Vector(0, 0, 0);
-	dst3D = src3D + (forward * Menu::Window.VisualsTab.OptionsTrace.GetValue());
-
-	ray.Init(src3D, dst3D);
-
-	Interfaces::Trace->TraceRay(ray, MASK_SHOT, &filter, &tr);
-
-	if (!Render::WorldToScreen(src3D, src) || !Render::WorldToScreen(tr.endpos, dst))
-		return;
-
-	Render::DrawLine(src.x, src.y, dst.x, dst.y, Color(255, 0, 0));
-	Render::DrawRect(dst.x - 3, dst.y - 3, 6, 6, Color(255, 0, 0));
-};
-
-
 void CEsp::Init()
 {
 	BombCarrier = nullptr;
@@ -67,7 +45,11 @@ void CEsp::Draw()
 	{
 		IClientEntity *pEntity = Interfaces::EntList->GetClientEntity(i);
 		player_info_t pinfo;
-
+		CUserCmd *pCmd;
+		PVOID pebp;
+		__asm mov pebp, ebp;
+		bool* pbSendPacket = (bool*)(*(DWORD*)pebp - 0x1C);
+		bool& bSendPacket = *pbSendPacket;
 
 		if (pEntity &&  pEntity != pLocal && !pEntity->IsDormant())
 		{
@@ -79,7 +61,7 @@ void CEsp::Draw()
 
 			if (Menu::Window.VisualsTab.FiltersPlayers.GetState() && Interfaces::Engine->GetPlayerInfo(i, &pinfo) && pEntity->IsAlive())
 			{
-				DrawPlayer(pEntity, pinfo);
+				DrawPlayer(pEntity, pinfo, &bSendPacket, pCmd);
 			}
 
 			ClientClass* cClass = (ClientClass*)pEntity->GetClientClass();
@@ -143,19 +125,18 @@ void CEsp::Draw()
 	{
 		GrenadeTrace();	
 	}
-	if (Menu::Window.VisualsTab.BulletTrace.GetState())
-	{
-		DrawLinesAA();
-	}
 }
 
-void CEsp::DrawPlayer(IClientEntity* pEntity, player_info_t pinfo)
+void CEsp::DrawPlayer(IClientEntity* pEntity, player_info_t pinfo , bool bSendPacket, CUserCmd *pCmd)
 {
 	ESPBox Box;
 	Color Color;
+	int real = -1;
 
 	if (Menu::Window.VisualsTab.FiltersEnemiesOnly.GetState() && (pEntity->GetTeamNum() == hackManager.pLocal()->GetTeamNum()))
 		return;
+
+
 
 	if (GetBox(pEntity, Box))
 	{
@@ -521,10 +502,8 @@ void CEsp::EntityGlow()
 	}
 }
 
-void CEsp::DrawLinesAA() {
-	float lineLBY;
-	float lineRealAngle;
-	float lineFakeAngle;
+/*
+void CEsp::DrawLinesAA(Color color) {
 	Vector src3D, dst3D, forward, src, dst;
 	trace_t tr;
 	Ray_t ray;
@@ -535,7 +514,7 @@ void CEsp::DrawLinesAA() {
 	// LBY
 	AngleVectors(QAngle(0, lineLBY, 0), &forward);
 	src3D = hackManager.pLocal()->GetOrigin();
-	dst3D = src3D + (forward * 60.f); //replace 50 with the length you want the line to have
+	dst3D = src3D + (forward * 55.f); //replace 50 with the length you want the line to have
 
 	ray.Init(src3D, dst3D);
 
@@ -545,8 +524,6 @@ void CEsp::DrawLinesAA() {
 		return;
 
 	Render::Line(src.x, src.y, dst.x, dst.y, Color(210, 105, 30, 255));
-
-	
 	// REAL AGNEL
 	AngleVectors(QAngle(0, lineRealAngle, 0), &forward);
 	dst3D = src3D + (forward * 50.f); //replace 50 with the length you want the line to have
@@ -560,7 +537,6 @@ void CEsp::DrawLinesAA() {
 
 	Render::Line(src.x, src.y, dst.x, dst.y, Color(0, 255, 0, 255));
 
-
 	// Fake AGNEL
 	AngleVectors(QAngle(0, lineFakeAngle, 0), &forward);
 	dst3D = src3D + (forward * 50.f); //replace 50 with the length you want the line to have
@@ -573,8 +549,8 @@ void CEsp::DrawLinesAA() {
 		return;
 
 	Render::Line(src.x, src.y, dst.x, dst.y, Color(255, 0, 0, 255));
-
 }
+*/
 
 
 static wchar_t* CharToWideChar(const char* text)

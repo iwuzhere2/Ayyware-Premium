@@ -75,12 +75,9 @@ void Offsets::Initialise()
 #pragma endregion Contains the VTable Indexs
 
 
-	Functions::KeyValues_KeyValues = Utilities::Memory::FindPattern("client.dll", (PBYTE)"\x68\x00\x00\x00\x00\x8B\xC8\xE8\x00\x00\x00\x00\x89\x45\xFC\xEB\x07\xC7\x45\x00\x00\x00\x00\x00\x8B\x03\x56", "x????xxx????xxxxxxx?????xxx");
-	Functions::KeyValues_KeyValues += 7;
-	Functions::KeyValues_KeyValues = Functions::KeyValues_KeyValues + *reinterpret_cast< PDWORD_PTR >(Functions::KeyValues_KeyValues + 1) + 5;
+	Functions::KeyValues_KeyValues = Utilities::Memory::FindPatternV2("client.dll", "55 8B EC 51 33 C0 C7 45");
 
-	Functions::KeyValues_LoadFromBuffer = Utilities::Memory::FindPatternV2("client.dll", "E8 ? ? ? ? 80 7D F8 00 ? ? 85 DB");
-	Functions::KeyValues_LoadFromBuffer = Functions::KeyValues_LoadFromBuffer + *reinterpret_cast< PDWORD_PTR >(Functions::KeyValues_LoadFromBuffer + 1) + 5;
+	Functions::KeyValues_LoadFromBuffer = Utilities::Memory::FindPatternV2("client.dll", "55 8B EC 83 E4 F8 83 EC 34 53 8B 5D 0C 89 4C 24 04");
 
 	Functions::dwCalcPlayerView =  Utilities::Memory::FindPattern("client.dll", (PBYTE)"\x84\xC0\x75\x08\x57\x8B\xCE\xE8\x00\x00\x00\x00\x8B\x06", "xxxxxxxx????xx");
 

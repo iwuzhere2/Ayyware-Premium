@@ -43,6 +43,7 @@ namespace Render
 	void Text(int x, int y, Color color, DWORD font, const char* text);
 	void Textf(int x, int y, Color color, DWORD font, const char* fmt, ...);
 	void Text(int x, int y, Color color, DWORD font, const wchar_t* text);
+	void Textlby(int x, int y, Color color, DWORD font, const wchar_t* text);
 	RECT GetTextSize(DWORD font, const char* text);
 
 	bool WorldToScreen(Vector &in, Vector &out);

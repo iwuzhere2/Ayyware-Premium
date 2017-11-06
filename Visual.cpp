@@ -96,20 +96,21 @@ void CVisuals::DefaultCrosshair()
 
 void CVisuals::SpreadCrosshair()
 {
+
 	IClientEntity *pLocal = hackManager.pLocal();
 	CBaseCombatWeapon* pWeapon = (CBaseCombatWeapon*)Interfaces::EntList->GetClientEntityFromHandle(pLocal->GetActiveWeaponHandle());
-
-	int xs;
-	int ys;
-	Interfaces::Engine->GetScreenSize(xs, ys);
-	xs /= 2; ys /= 2;
-
-	auto accuracy = pWeapon->GetAccuracyPenalty() * 3000.f;
-	while (accuracy > 256) {
-		accuracy -= 8;
-	}
 	if (pLocal->IsAlive())
 	{
-		Render::DrawCircle(xs, ys, accuracy, accuracy, Color(255, 0, 0, 255));
+		int xs;
+		int ys;
+		Interfaces::Engine->GetScreenSize(xs, ys);
+		xs /= 2; ys /= 2;
+	
+		auto accuracy = pWeapon->GetAccuracyPenalty() * 3000.f;
+		while (accuracy > 256) {
+			accuracy -= 8;
+		}
+	
+			Render::DrawCircle(xs, ys, accuracy, accuracy, Color(255, 0, 0, 255));
 	}
 }

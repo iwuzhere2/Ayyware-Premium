@@ -30,9 +30,9 @@ float GetHitgroupDamageMult(int iHitGroup)
 	case HITGROUP_GENERIC:
 		return 0.5f;
 	case HITGROUP_HEAD:
-		return 2.0f;
+		return 4.0f;
 	case HITGROUP_CHEST:
-		return 0.5f;
+		return 1.f;
 	case HITGROUP_STOMACH:
 		return 0.75f;
 	case HITGROUP_LEFTARM:

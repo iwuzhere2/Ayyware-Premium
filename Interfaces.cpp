@@ -1,6 +1,9 @@
 #include "Interfaces.h"
 #include "Utilities.h"
 
+#include "Backtrack.h"
+#include "lagcomp.h"
+
 typedef void* (__cdecl* CreateInterface_t)(const char*, int*);
 typedef void* (*CreateInterfaceFn)(const char *pName, int *pReturnCode);
 

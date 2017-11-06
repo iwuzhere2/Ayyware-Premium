@@ -213,6 +213,9 @@
     <ClInclude Include="checksum_md5.h">
       <Filter>Header Files\Hacks</Filter>
     </ClInclude>
+    <ClInclude Include="LagComp.h">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DLLMain.cpp">
@@ -312,6 +315,9 @@
       <Filter>Source Files\Hacks</Filter>
     </ClCompile>
     <ClCompile Include="LagComp.cpp">
+      <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="Backtrack.cpp">
       <Filter>Source Files\Hacks</Filter>
     </ClCompile>
   </ItemGroup>

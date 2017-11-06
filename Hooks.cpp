@@ -10,7 +10,12 @@
 #include "Resolver.h"
 #include "hitmarker.h"
 #include "LagComp.h"
+#include "UTIL Functions.h"
 #include <intrin.h>
+
+
+#define TICK_INTERVAL			( Interfaces::Globals->interval_per_tick )
+#define TIME_TO_TICKS( dt )		( (int)( 0.5f + (float)(dt) / TICK_INTERVAL ) )
 
 #define MakePtr(cast, ptr, addValue) (cast)( (DWORD)(ptr) + (DWORD)(addValue))
 
@@ -34,6 +39,9 @@ int Globals::Shots;
 bool Globals::change;
 int Globals::TargetID;
 std::map<int, QAngle>Globals::storedshit;
+
+LagCompensation *lagComp = nullptr;
+
 int Globals::missedshots;
 
 typedef void(__thiscall* DrawModelEx_)(void*, void*, void*, const ModelRenderInfo_t&, matrix3x4*);
@@ -186,8 +194,20 @@ bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 		Vector qAimAngles;
 		qAimAngles.Init(0.0f, pCmd->viewangles.y, 0.0f);
 		AngleVectors(qAimAngles, &viewforward, &viewright, &viewup);
-		int tick = pCmd->tick_count;
-
+		//int tick = pCmd->tick_count;
+		/*
+		if (hackManager.pLocal()->IsAlive() && Menu::Window.VisualsTab.BulletTrace.GetState())
+		{
+			lineLBY = hackManager.pLocal()->GetLowerBodyYaw();
+			
+			if (bSendPacket == true) {
+				lineFakeAngle = pCmd->viewangles.y;
+			}
+			else {
+				lineRealAngle = pCmd->viewangles.y;
+			}
+		}
+		*/
 		IClientEntity* pEntity;
 		IClientEntity *pLocal = Interfaces::EntList->GetClientEntity(Interfaces::Engine->GetLocalPlayer());
 		if (Interfaces::Engine->IsConnected() && Interfaces::Engine->IsInGame() && pLocal && pLocal->IsAlive())
@@ -197,8 +217,9 @@ bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 		}
 		if (Menu::Window.RageBotTab.AccuracySpread.GetState())
 		{
-			backtracking->Update(tick);
+			//backtracking->Update(tick);
 		}
+
 		if (Menu::Window.MiscTab.FakeLagEnable.GetState())
 		{
 			static int ticks = 0;
@@ -574,6 +595,7 @@ std::string GetTimeString()
 
 void __fastcall PaintTraverse_Hooked(PVOID pPanels, int edx, unsigned int vguiPanel, bool forceRepaint, bool allowForce)
 {
+	CUserCmd* pCmd;
 	if (Menu::Window.VisualsTab.Active.GetState() && Menu::Window.VisualsTab.OtherNoScope.GetState() && strcmp("HudZoom", Interfaces::Panels->GetName(vguiPanel)) == 0)
 		return;
 
@@ -595,11 +617,19 @@ void __fastcall PaintTraverse_Hooked(PVOID pPanels, int edx, unsigned int vguiPa
 	{
 		if (Menu::Window.VisualsTab.Clock.GetState())
 		{
-			Render::Textf(14, 24, Color(255, 255, 255, 255), Render::Fonts::Slider, ("%s"), GetTimeString().c_str());
+			char lby[50];
+			sprintf(lby, "%f", hackManager.pLocal()->GetLowerBodyYaw());
+			Render::Text(7, 24, Color(0, 114, 225, 255), Render::Fonts::Slider, (lby));
 		}
+
 		if (Menu::Window.VisualsTab.Watermark.GetState())
 		{
-			Render::Text(7, 7, Color(255, 255, 255, 255), Render::Fonts::Slider, ("AVOZ Beta"));
+
+			if (hackManager.pLocal()->GetVelocity().Length2D() > 33 && hackManager.pLocal()->GetFlags() & FL_ONGROUND)
+			Render::Text(7, 7, Color(255, 0, 0, 255), Render::Fonts::Slider, ("LBY"));
+			
+			else
+			Render::Text(7, 7, Color(0, 255, 0, 255), Render::Fonts::Slider, ("LBY"));
 		}
 
 		if (Interfaces::Engine->IsConnected() && Interfaces::Engine->IsInGame())
@@ -625,6 +655,24 @@ void __fastcall PaintTraverse_Hooked(PVOID pPanels, int edx, unsigned int vguiPa
 			ConVar* AmbientBlueCvar = Interfaces::CVar->FindVar("mat_ambient_light_b");
 			*(float*)((DWORD)&AmbientBlueCvar->fnChangeCallback + 0xC) = NULL;
 			AmbientBlueCvar->SetValue(AmbientBlueAmount);
+
+			
+			/*
+			char bufferLineLBY[64];
+			sprintf_s(bufferLineLBY, "LowerBodyYaw:  %.1f", lineLBY);
+			if (Menu::Window.VisualsTab.BulletTrace.GetState() && hackManager.pLocal()->IsAlive())
+			Render::Text(70, 320, Color(249, 151, 54, 255), Render::Fonts::Slider, bufferLineLBY);
+
+			char bufferlineRealAngle[64];
+			sprintf_s(bufferlineRealAngle, "Real Angle:  %.1f", lineRealAngle);
+			if (Menu::Window.VisualsTab.BulletTrace.GetState() && hackManager.pLocal()->IsAlive())
+			Render::Text(70, 340, Color(0, 255, 0, 255), Render::Fonts::Slider, bufferlineRealAngle);
+
+			char bufferlineFakeAngle[64];
+			sprintf_s(bufferlineFakeAngle, "Fake Angle:  %.1f", lineFakeAngle);
+			if (Menu::Window.VisualsTab.BulletTrace.GetState() && hackManager.pLocal()->IsAlive())
+			Render::Text(70, 360, Color(202, 43, 43, 255), Render::Fonts::Slider, bufferlineFakeAngle);
+			*/
 		}
 
 		Menu::DoUIFrame();
@@ -1314,73 +1362,9 @@ void  __stdcall Hooked_FrameStageNotify(ClientFrameStage_t curStage)
 				*(Vector*)((DWORD)pLocal + 0x31C8) = LastAngleAA;
 		}
 
-		if (Menu::Window.MiscTab.OtherThirdperson.GetState())
-		{
-			static bool rekt = false;
-			if (!rekt)
-			{
-				ConVar* sv_cheats = Interfaces::CVar->FindVar("sv_cheats");
-				SpoofedConvar* sv_cheats_spoofed = new SpoofedConvar(sv_cheats);
-				sv_cheats_spoofed->SetInt(1);
-				rekt = true;
-			}
-		}
 
-		static bool rekt1 = false;
-		if (Menu::Window.MiscTab.OtherThirdperson.GetState() && pLocal->IsAlive() && pLocal->IsScoped() == 0)
-		{
-			if (!rekt1)
-			{
-				Interfaces::Engine->ClientCmd_Unrestricted("thirdperson");
-				rekt1 = true;
-			}
-		}
-		else if (!Menu::Window.MiscTab.OtherThirdperson.GetState())
-		{
-			rekt1 = false;
-		}
 
-		static bool rekt = false;
-		if (!Menu::Window.MiscTab.OtherThirdperson.GetState() || pLocal->IsAlive() == 0)
-		{
-			if (!rekt)
-			{
-				Interfaces::Engine->ClientCmd_Unrestricted("firstperson");
-				rekt = true;
-			}
-		}
-		else if (Menu::Window.MiscTab.OtherThirdperson.GetState() || pLocal->IsAlive() == 0)
-		{
-			rekt = false;
-		}
 
-		static bool meme = false;
-		if (Menu::Window.MiscTab.OtherThirdperson.GetState() && pLocal->IsScoped() == 0)
-		{
-			if (!meme)
-			{
-				Interfaces::Engine->ClientCmd_Unrestricted("thirdperson");
-				meme = true;
-			}
-		}
-		else if (pLocal->IsScoped())
-		{
-			meme = false;
-		}
-
-		static bool kek = false;
-		if (Menu::Window.MiscTab.OtherThirdperson.GetState() && pLocal->IsAlive())
-		{
-			if (!kek)
-			{
-				Interfaces::Engine->ClientCmd_Unrestricted("thirdperson");
-				kek = true;
-			}
-		}
-		else if (pLocal->IsAlive() == 0)
-		{
-			kek = false;
-		}
 	}
 
 	if (Menu::Window.RageBotTab.PVSFix.GetState())
@@ -2811,6 +2795,7 @@ void  __stdcall Hooked_FrameStageNotify(ClientFrameStage_t curStage)
 void __fastcall Hooked_OverrideView(void* ecx, void* edx, CViewSetup* pSetup)
 {
 	IClientEntity* pLocal = (IClientEntity*)Interfaces::EntList->GetClientEntity(Interfaces::Engine->GetLocalPlayer());
+	CUserCmd* pCmd;
 
 	if (Interfaces::Engine->IsConnected() && Interfaces::Engine->IsInGame())
 	{
@@ -2821,6 +2806,28 @@ void __fastcall Hooked_OverrideView(void* ecx, void* edx, CViewSetup* pSetup)
 		}
 
 		oOverrideView(ecx, edx, pSetup);
+	}
+	if (Interfaces::Engine->IsInGame())
+	{
+		if (hackManager.pLocal())
+		{
+			//Vector vecAngles;
+			pCmd->viewangles;
+			Interfaces::Engine->GetViewAngles(pCmd->viewangles);
+			if (Menu::Window.MiscTab.OtherThirdperson.GetState())
+			{
+				if (!Interfaces::pInput->m_fCameraInThirdPerson)
+				{
+					Interfaces::pInput->m_fCameraInThirdPerson = true;
+					Interfaces::pInput->m_vecCameraOffset = Vector(pCmd->viewangles.x, pCmd->viewangles.y, 40);
+				}
+			}
+			else
+			{
+				Interfaces::pInput->m_fCameraInThirdPerson = false;
+				Interfaces::pInput->m_vecCameraOffset = Vector(pCmd->viewangles.x, pCmd->viewangles.y, 0);
+			}
+		}
 	}
 
 }

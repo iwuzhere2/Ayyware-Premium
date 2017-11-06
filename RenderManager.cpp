@@ -173,7 +173,16 @@ void Render::Text(int x, int y, Color color, DWORD font, const char* text)
 	return;
 }
 
+
 void Render::Text(int x, int y, Color color, DWORD font, const wchar_t* text)
+{
+	Interfaces::Surface->DrawSetTextFont(font);
+	Interfaces::Surface->DrawSetTextColor(color);
+	Interfaces::Surface->DrawSetTextPos(x, y);
+	Interfaces::Surface->DrawPrintText(text, wcslen(text));
+}
+
+void Render::Textlby(int x, int y, Color color, DWORD font, const wchar_t* text)
 {
 	Interfaces::Surface->DrawSetTextFont(font);
 	Interfaces::Surface->DrawSetTextColor(color);

@@ -12,7 +12,7 @@ void LowerBodyYawFix(IClientEntity* pEntity)
 		if (Interfaces::Engine->GetLocalPlayer()) return;
 
 		auto EyeAngles = pEntity->GetEyeAnglesXY();
-		if (pEntity->GetVelocity().Length() > 1 && (pEntity->GetFlags() & (int)pEntity->GetFlags() & FL_ONGROUND))
+		if (pEntity->GetVelocity().Length() > 36 && (pEntity->GetFlags() & (int)pEntity->GetFlags() & FL_ONGROUND))
 			EyeAngles->y = pEntity->GetLowerBodyYaw();
 	}
 }

@@ -367,6 +367,7 @@ public:
 	CCheckBox ChatSpam;
 	CKeyBind OtherCircleButton;
 	CCheckBox OtherCircleStrafe;
+	CSlider OtherCircleSlider;
 	CKeyBind OtherCircle;
 	CTextField CustomClantag;
 	CCheckBox CheatsByPass;

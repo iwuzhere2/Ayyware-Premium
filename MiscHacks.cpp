@@ -89,9 +89,6 @@ void CMiscHacks::Move(CUserCmd *pCmd, bool &bSendPacket)
 	if (Menu::Window.VisualsTab.DisablePostProcess.GetState())
 		PostProcces();
 
-	if (Menu::Window.MiscTab.CheatsByPass.GetState())
-		SvCheats();
-
 }
 
 static __declspec(naked) void __cdecl Invoke_NET_SetConVar(void* pfn, const char* cvar, const char* value)
@@ -168,9 +165,6 @@ void CMiscHacks::PostProcces()
 
 void CMiscHacks::SvCheats()
 {
-	ConVar* sv = Interfaces::CVar->FindVar("sv_cheats");
-	SpoofedConvar* sv_spoofed = new SpoofedConvar(sv);
-	sv_spoofed->SetInt(2);
 }
 
 void CMiscHacks::FakeWalk(CUserCmd* pCmd, bool &bSendPacket)
@@ -326,11 +320,17 @@ bool CMiscHacks::CircularStrafe(CUserCmd* pCmd, Vector& OriginalView)
 	if (!pLocalEntity->IsAlive())
 		return false;
 
+
+	/*
+	OtherCircleSlider
+
+	Menu::Window.MiscTab.OtherCircleStrafe.
+	*/
 	CircleFactor++;
+	int GetItDoubled = Menu::Window.MiscTab.OtherCircleSlider.GetValue() * CircleFactor - Interfaces::Globals->interval_per_tick;
 	if (CircleFactor > 360)
 		CircleFactor = 0;
 
-	int GetItDoubled = 1.1 * CircleFactor - Interfaces::Globals->interval_per_tick;
 
 	Vector StoredViewAngles = pCmd->viewangles;
 
@@ -341,6 +341,7 @@ bool CMiscHacks::CircularStrafe(CUserCmd* pCmd, Vector& OriginalView)
 		pCmd->viewangles = OriginalView;
 		RotateMovement(pCmd, GetItDoubled);
 	}
+	
 	return true;
 }
 
