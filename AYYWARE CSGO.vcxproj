@@ -125,6 +125,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="aim.h" />
     <ClInclude Include="AntiAntiAim.h" />
     <ClInclude Include="AntiLeak.h" />
     <ClInclude Include="Autowall.h" />
@@ -177,6 +178,7 @@
     <ClInclude Include="Visuals.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="aim.cpp" />
     <ClCompile Include="AntiAntiAim.cpp" />
     <ClCompile Include="Autowall.cpp" />
     <ClCompile Include="Backtrack.cpp" />

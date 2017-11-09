@@ -12,6 +12,7 @@
 #include "LagComp.h"
 #include "UTIL Functions.h"
 #include <intrin.h>
+#include "EngineClient.h"
 
 
 #define TICK_INTERVAL			( Interfaces::Globals->interval_per_tick )
@@ -174,6 +175,74 @@ int LagCompBreak() {
 	}
 	return 1;
 }
+
+
+
+
+
+
+
+bool WorldToScreen(const Vector& vOrigin, Vector& vScreen)
+{
+	static float* ViewMatrixOld = nullptr;
+	float* ViewMatrix = nullptr;
+
+	if (!ViewMatrixOld)
+	{
+		ViewMatrixOld = FindW2Matrix();
+	}
+	else
+	{
+		ViewMatrix = (float*)(*(PDWORD)(ViewMatrixOld)+0x3DC);
+	}
+
+	if (ViewMatrix && *ViewMatrix)
+	{
+		vScreen.x = ViewMatrix[0] * vOrigin.x + ViewMatrix[1] * vOrigin.y + ViewMatrix[2] * vOrigin.z + ViewMatrix[3];
+		vScreen.y = ViewMatrix[4] * vOrigin.x + ViewMatrix[5] * vOrigin.y + ViewMatrix[6] * vOrigin.z + ViewMatrix[7];
+		float w = ViewMatrix[12] * vOrigin.x + ViewMatrix[13] * vOrigin.y + ViewMatrix[14] * vOrigin.z + ViewMatrix[15];
+
+		if (w < 0.01f)
+			return false;
+
+		float invw = 1.0f / w;
+		vScreen.x *= invw;
+		vScreen.y *= invw;
+
+		int x;
+		int y;
+
+		Interfaces::Engine->GetScreenSize(x, y);
+
+		x / 2;
+		y / 2;
+
+		x += 0.5f * vScreen.x * x + 0.5f;
+		y -= 0.5f * vScreen.y * y + 0.5f;
+
+		vScreen.x = x;
+		vScreen.y = y;
+
+		return true;
+	}
+
+	return false;
+}
+
+float* FindW2Matrix()
+{
+	return (float*)(reinterpret_cast<DWORD>(&Offsets::VMT::Engine_WorldToScreenMatrix) + 0x40);
+}
+
+
+
+
+
+
+
+
+
+
 
 bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 {

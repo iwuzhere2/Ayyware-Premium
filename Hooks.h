@@ -22,6 +22,8 @@ namespace Hooks
 	extern Utilities::Memory::VMTManager VMTEventManager;
 };
 
+float*	FindW2Matrix();
+
 extern float lineLBY;
 extern float lineRealAngle;
 extern float lineFakeAngle;

@@ -765,22 +765,29 @@ bool CRageBot::AimAtPoint(IClientEntity* pLocal, Vector point, CUserCmd *pCmd, b
 	if (point.Length() == 0) return ReturnValue;
 
 	Vector angles;
-	Vector src = pLocal->GetOrigin() + pLocal->GetViewOffset();
+	Vector src = pLocal->GetEyePosition() + pLocal->GetViewOffset();
+	//--Indigo
+	Vector vAimAngle;
+	VectorAngles(point - pLocal->GetEyePosition(), vAimAngle);
 
-	CalcAngle(src, point, angles);
+	//CalcAngle(src, point, angles);  --Avoz
 	GameUtils::NormaliseViewAngle(angles);
 
-	if (angles[0] != angles[0] || angles[1] != angles[1])
-	{
-		return ReturnValue;
-	}
+	//if (angles[0] != angles[0] || angles[1] != angles[1])
+	//{
+	//	return ReturnValue;
+	//}
 	IsLocked = true;
 
-	Vector ViewOffset = pLocal->GetOrigin() + pLocal->GetViewOffset();
+	//Vector ViewOffset = pLocal->GetOrigin() + pLocal->GetViewOffset();
+	
+
+
+
 	if (!IsAimStepping)
 		LastAimstepAngle = LastAngle;
 
-	float fovLeft = FovToPlayer(ViewOffset, LastAimstepAngle, Interfaces::EntList->GetClientEntity(TargetID), 0);
+	float fovLeft = FovToPlayer(vAimAngle, LastAimstepAngle, Interfaces::EntList->GetClientEntity(TargetID), 0);
 
 	if (fovLeft > 25.0f && Menu::Window.RageBotTab.AimbotAimStep.GetState())
 	{
@@ -798,12 +805,12 @@ bool CRageBot::AimAtPoint(IClientEntity* pLocal, Vector point, CUserCmd *pCmd, b
 
 	if (Menu::Window.RageBotTab.AimbotSilentAim.GetState())
 	{
-		pCmd->viewangles = angles;
+		pCmd->viewangles = vAimAngle;
 	}
 
 	if (!Menu::Window.RageBotTab.AimbotSilentAim.GetState())
 	{
-		Interfaces::Engine->SetViewAngles(angles);
+		Interfaces::Engine->SetViewAngles(vAimAngle);
 	}
 
 	return ReturnValue;
