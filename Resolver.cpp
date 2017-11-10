@@ -163,9 +163,43 @@ void ResolverSetup::Resolve(IClientEntity* pEntity)
 			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw();
 		}
 		else {
-			if (IsFakeWalking(pEntity) || Differences[pEntity->GetIndex()] == -1377)
+			if (IsFakeWalking(pEntity) || Differences[pEntity->GetIndex()] == -1337)
 				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 180;
 			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() - Differences[pEntity->GetIndex()];
+		}
+	}
+	else if (Menu::Window.RageBotTab.AimbotResolver.GetIndex() == 4)//level 4
+	{
+		if (IsMovingOnGround(pEntity) && !IsFakeWalking(pEntity)) {
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw();
+		}
+		else {
+			int i = 0;
+			if (i == 0)
+			{
+				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw();
+				i++;
+			}
+			if (i == 1)
+			{
+				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 35.f;
+				i++;
+			}
+			if (i == 2)
+			{
+				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 105.f;
+				i++;
+			}
+			if (i == 3)
+			{
+				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 140.f;
+				i++;
+			}
+			if (i == 4)
+			{
+				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 210.f;
+				i = 0;
+			}
 		}
 	}
 	LowerBodyYawFix(pEntity);

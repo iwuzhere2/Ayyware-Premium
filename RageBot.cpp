@@ -871,20 +871,35 @@ namespace AntiAims
 	void killLBY(CUserCmd *pCmd, bool &bSendPacket)
 	{
 		IClientEntity* LocalPlayer = hackManager.pLocal();
-		if (LocalPlayer->GetFlags() & FL_ONGROUND && pCmd->viewangles.y != 36)
+		float angle;
+		float anglex2;
+		int i = 0;
+
+		angle = 34;
+		anglex2 = angle * 2;
+		
+		if (LocalPlayer->GetFlags() & FL_ONGROUND)
 		{
-			pCmd->viewangles.y = 0.f;
-			pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + 36.f;
-		}
-		else if (pCmd->viewangles.y = 36)
-		{
-			bSendPacket = false;
-			
-			if (!bSendPacket)
+			if (i == 0)
 			{
-				pCmd->viewangles.y = hackManager.pLocal()->GetLowerBodyYaw() + 180.00f;
-				bSendPacket = false;
+				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + angle;
+				i++;
 			}
+			if (i == 1)
+			{
+				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() - anglex2;
+				i++;
+			}
+			if (i == 2)
+			{
+				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + anglex2;
+				i = 1;
+			}
+		}
+		else
+		{
+			pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + 180.f;
+			i = 0;
 		}
 	}
 

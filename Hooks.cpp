@@ -243,7 +243,7 @@ float* FindW2Matrix()
 
 
 
-
+bool sendpacket = true;
 bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 {
 	if (!pCmd->command_number)
@@ -283,10 +283,6 @@ bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 		{
 			Hacks::MoveHacks(pCmd, bSendPacket);
 			ResolverSetup::GetInst().CM(pEntity);
-		}
-		if (Menu::Window.RageBotTab.AccuracySpread.GetState())
-		{
-			//backtracking->Update(tick);
 		}
 
 		if (Menu::Window.MiscTab.FakeLagEnable.GetState())
@@ -578,8 +574,6 @@ bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 	}
 }
 
-bool sendpacket = true;
-
 void FakeLag(CUserCmd* pCmd)
 {
 
@@ -664,7 +658,6 @@ std::string GetTimeString()
 
 void __fastcall PaintTraverse_Hooked(PVOID pPanels, int edx, unsigned int vguiPanel, bool forceRepaint, bool allowForce)
 {
-	CUserCmd* pCmd;
 	if (Menu::Window.VisualsTab.Active.GetState() && Menu::Window.VisualsTab.OtherNoScope.GetState() && strcmp("HudZoom", Interfaces::Panels->GetName(vguiPanel)) == 0)
 		return;
 
@@ -687,10 +680,19 @@ void __fastcall PaintTraverse_Hooked(PVOID pPanels, int edx, unsigned int vguiPa
 		if (Menu::Window.VisualsTab.Clock.GetState())
 		{
 			char lby[50];
+			char fake[50];
+			char real[50];
+
+			if (sendpacket)
+				sprintf(real, "%f", hackManager.pLocal()->GetEyeAnglesXY()->y);
+			else
+				sprintf(fake, "%f", hackManager.pLocal()->GetEyeAnglesXY()->y);
+
 			sprintf(lby, "%f", hackManager.pLocal()->GetLowerBodyYaw());
 			Render::Text(7, 24, Color(0, 114, 225, 255), Render::Fonts::Slider, (lby));
+			Render::Text(7, 41, Color(255, 0, 0, 255), Render::Fonts::Slider, (fake));
+			Render::Text(7, 58, Color(0, 255, 0, 255), Render::Fonts::Slider, (real));
 		}
-
 		if (Menu::Window.VisualsTab.Watermark.GetState())
 		{
 

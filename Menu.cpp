@@ -248,9 +248,10 @@ void CRageBotTab::Setup()
 
 	AimbotResolver.SetFileId("acc_aaa");
 	AimbotResolver.AddItem("Off");
-	AimbotResolver.AddItem("Level 1");
-	AimbotResolver.AddItem("Level 2");
-	AimbotResolver.AddItem("Level 3");
+	AimbotResolver.AddItem("40° +- antijitter");
+	AimbotResolver.AddItem("oldlbydelta");
+	AimbotResolver.AddItem("anti-fakehead");
+	AimbotResolver.AddItem("brute");
 	AccuracyGroup.PlaceLabledControl("Resolver", this, &AimbotResolver);
 
 	AccuracyHitchance.SetFileId("acc_chance");
