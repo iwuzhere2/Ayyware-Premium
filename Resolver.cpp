@@ -88,6 +88,8 @@ void ResolverSetup::Resolve(IClientEntity* pEntity)
 	else
 		IsMoving = false;
 
+	int i = 0;
+
 	ResolverSetup::NewANgles[pEntity->GetIndex()] = *pEntity->GetEyeAnglesXY();
 	ResolverSetup::newlby[pEntity->GetIndex()] = pEntity->GetLowerBodyYaw();
 	ResolverSetup::newsimtime = pEntity->GetSimulationTime();
@@ -95,10 +97,12 @@ void ResolverSetup::Resolve(IClientEntity* pEntity)
 	ResolverSetup::newlbydelta[pEntity->GetIndex()] = pEntity->GetLowerBodyYaw();
 	ResolverSetup::finaldelta[pEntity->GetIndex()] = ResolverSetup::newdelta[pEntity->GetIndex()] - ResolverSetup::storeddelta[pEntity->GetIndex()];
 	ResolverSetup::finallbydelta[pEntity->GetIndex()] = ResolverSetup::newlbydelta[pEntity->GetIndex()] - ResolverSetup::storedlbydelta[pEntity->GetIndex()];
+	ResolverSetup::lbydif[pEntity->GetIndex()] = ResolverSetup::newlby[pEntity->GetIndex()] - ResolverSetup::storedlby[pEntity->GetIndex()];
 	if (newlby == storedlby)
 		ResolverSetup::lbyupdated = false;
 	else
 		ResolverSetup::lbyupdated = true;
+		 
 
 	if (Menu::Window.RageBotTab.AimbotResolver.GetIndex() == 0)
 	{
@@ -106,35 +110,30 @@ void ResolverSetup::Resolve(IClientEntity* pEntity)
 	}
 	else if (Menu::Window.RageBotTab.AimbotResolver.GetIndex() == 1)//level 1
 	{
-		for (int i = 1; i < 20; ++i) {
-			static float OldLowerBodyYaws[64];
-			static float OldYawDeltas[64];
-			float CurYaw = pEntity->GetLowerBodyYaw();
-			if (OldLowerBodyYaws[i] != CurYaw) {
-				OldYawDeltas[i] = pEntity->GetEyeAnglesXY()->y - CurYaw;
-				OldLowerBodyYaws[i] = CurYaw;
-				pEntity->GetEyeAnglesXY()->y = CurYaw;
-				continue;
-			}
-			else 
-			{
-				static int m8 = 2;
-				if (m8 = 2)
-				{
-					pEntity->GetEyeAnglesXY()->y = pEntity->GetEyeAnglesXY()->y - OldYawDeltas[i] + 17.4f;
-					m8++;
-				}
-				else if (m8 = 3)
-				{
-					pEntity->GetEyeAnglesXY()->y = pEntity->GetEyeAnglesXY()->y - OldYawDeltas[i] - 34.9f;
-					m8++;
-				}
-				else if (m8 = 4)
-				{
-					pEntity->GetEyeAnglesXY()->y = pEntity->GetEyeAnglesXY()->y - OldYawDeltas[i] + 17.4f;
-					m8 = 2;
-				}
-			}
+		if (i == 0 || lbyupdated)
+		{
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw();
+			i++;
+		}
+		if (i == 1 && !lbyupdated)
+		{
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 35.f;
+			i++;
+		}
+		if (i == 2 && !lbyupdated)
+		{
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 105.f;
+			i++;
+		}
+		if (i == 3)
+		{
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 140.f;
+			i++;
+		}
+		if (i == 4)
+		{
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 210.f;
+			i = 0;
 		}
 	}
 	else if (Menu::Window.RageBotTab.AimbotResolver.GetIndex() == 2) //level 2 
@@ -173,36 +172,43 @@ void ResolverSetup::Resolve(IClientEntity* pEntity)
 		if (IsMovingOnGround(pEntity) && !IsFakeWalking(pEntity)) {
 			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw();
 		}
-		else {
-			int i = 0;
-			if (i == 0)
+		else 
+		{
+			if (ResolverSetup::lbydif[pEntity->GetIndex()] >= 20.f)
 			{
-				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw();
-				i++;
+				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() - 30.f;
 			}
-			if (i == 1)
+			else if (ResolverSetup::lbydif[pEntity->GetIndex()] >= 70.f)
 			{
-				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 35.f;
-				i++;
+				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() - 90.f;
 			}
-			if (i == 2)
+			else if (ResolverSetup::lbydif[pEntity->GetIndex()] >= 125.f)
 			{
-				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 105.f;
-				i++;
+				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() - 130.f;
 			}
-			if (i == 3)
+			else if (ResolverSetup::lbydif[pEntity->GetIndex()] >= 170.f)
 			{
-				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 140.f;
-				i++;
+				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() - 180.f;
 			}
-			if (i == 4)
+			else if (ResolverSetup::lbydif[pEntity->GetIndex()] <= -170.f)
 			{
-				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 210.f;
-				i = 0;
+				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 30.f;
+			}
+			else if (ResolverSetup::lbydif[pEntity->GetIndex()] <= -125.f)
+			{
+				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 130.f;
+			}
+			else if (ResolverSetup::lbydif[pEntity->GetIndex()] <= -70.f)
+			{
+				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 90.f;
+			}
+			else if (ResolverSetup::lbydif[pEntity->GetIndex()] <= -20.f)
+			{
+				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 30.f;
 			}
 		}
 	}
-	LowerBodyYawFix(pEntity);
+	//LowerBodyYawFix(pEntity);
 	PitchCorrection();
 }
 

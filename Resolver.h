@@ -30,6 +30,7 @@ public:
 	std::map<int, float>storedlbydelta;
 	std::map<int, float>newlbydelta;
 	std::map<int, float>finallbydelta;
+	std::map<int, float>lbydif;
 	float newsimtime;
 	float storedsimtime;
 	bool lbyupdated;
