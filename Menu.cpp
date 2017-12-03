@@ -90,6 +90,7 @@ void AvozWindow::Setup()
 	RegisterTab(&MiscTab);
 	RegisterTab(&ColorsTab);
 	RegisterTab(&SkinchangerTab);
+	//RegisterTab(&PlayerList);
 
 	RECT Client = GetClientArea();
 	Client.bottom -= 29;
@@ -790,6 +791,9 @@ void CVisualTab::Setup()
 
 	FiltersC4.SetFileId("ftr_c4");
 	FiltersGroup.PlaceLabledControl("C4", this, &FiltersC4);
+
+	Filtersown.SetFileId("ftr_own");
+	FiltersGroup.PlaceLabledControl("Self", this, &Filtersown);
 
 #pragma endregion Setting up the Filters controls
 
@@ -1695,8 +1699,8 @@ void CSkinchangerTab::Setup()
 
 #pragma endregion other random options
 }
-
-/*void CPlayersTab::Setup()
+/*
+void CPlayersTab::Setup()
 {
 	SetTitle("PlayerList");
 
@@ -1710,7 +1714,6 @@ void CSkinchangerTab::Setup()
 
 	pListPlayers.SetPosition(26, 46);
 	pListPlayers.SetSize(640, 50);
-	pListPlayers.SetHeightInItems(20);
 	RegisterControl(&pListPlayers);
 
 #pragma endregion
@@ -1851,8 +1854,8 @@ void UpdatePlayerList()
 		PlayerList[meme].AimPrio = Menu::Window.Playerlist.OptionsAimPrio.GetState();
 		PlayerList[meme].Callout = Menu::Window.Playerlist.OptionsCalloutSpam.GetState();
 	}
-}*/
-
+}
+*/
 void Menu::SetupMenu()
 {
 	Window.Setup();

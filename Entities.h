@@ -811,6 +811,11 @@ public:
 		return (QAngle*)((DWORD)this + GET_NETVAR("DT_CSPlayer", "m_angEyeAngles"));
 	}
 
+	Vector GetEyeAnglesVecXY()
+	{
+		return (Vector)((DWORD)this + GET_NETVAR("DT_CSPlayer", "m_angEyeAngles"));
+	}
+
 	Vector GetBonePos(int i)
 	{
 		matrix3x4 boneMatrix[128];

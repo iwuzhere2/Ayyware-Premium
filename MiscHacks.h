@@ -4,6 +4,7 @@
 
 Vector GetAutostrafeView();
 
+
 class CMiscHacks : public CHack
 {
 public:
@@ -17,7 +18,7 @@ private:
 	void SvCheats();
 	void SetClanTag(const char * tag, const char * name);
 	void FakeWalk(CUserCmd * pCmd, bool & bSendPacket);
-	void SlowMo(CUserCmd * pCmd);
+	void SlowMo(CUserCmd * pCmd, bool &bSendPacket);
 	void Namespam();
 	void NoName();
 	void NameSteal();

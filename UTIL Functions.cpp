@@ -133,7 +133,7 @@ bool GameUtils::IsVisible(IClientEntity* pLocal, IClientEntity* pEntity, int Bon
 	if (BoneID < 0) return false;
 
 	entCopy = pEntity;
-	Vector start = pLocal->GetOrigin() + pLocal->GetViewOffset();
+	Vector start = pLocal->GetEyePosition();
 	Vector end = GetHitboxPosition(pEntity, BoneID);
 	char shit3[32];
 

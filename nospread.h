@@ -1,4 +1,4 @@
-/*#define IA 16807
+#define IA 16807
 #define IM 2147483647
 #define IQ 127773
 #define IR 2836
@@ -28,7 +28,6 @@ extern C_Random*Random;
 class CNoSpread
 {
 public:
-	float sseSqrt(float x);
 	void CalcClient(Vector vSpreadVec, Vector ViewIn, Vector &ViewOut);
 	void CalcServer(Vector vSpreadVec, Vector ViewIn, Vector &vecSpreadDir);
 	void GetSpreadVec(CUserCmd*cmd, Vector &vSpreadVec);
@@ -41,9 +40,9 @@ public:
 	}
 private:
 	void AngleVectors(Vector angles, Vector &f);
-	void AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 	void VectorAngles(const float *forward, float *angles);
 	void VectorAngles(const Vector &forward, const Vector &pseudoup, Vector &angles);
+	void AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 };
 
-extern CNoSpread NoSpread;*/
+extern CNoSpread NoSpread;

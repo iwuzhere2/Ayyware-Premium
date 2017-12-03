@@ -2,10 +2,10 @@
 
 #include "Hacks.h"
 
-extern float lineLBY;
-extern float lineRealAngle;
-extern float lineFakeAngle;
 
+
+void DrawTrace();
+void DrawAA(Vector view, bool &bSendPacket);
 class CEsp : public CHack
 {
 public:
@@ -64,6 +64,8 @@ private:
 	void DrawDistance(CEsp::ESPBox size, IClientEntity * pEntity);
 
 	float DistanceTo(Vector vecSrc, Vector vecDst);
+
+	
 
 	void DrawChicken(IClientEntity* pEntity, ClientClass* cClass);
 	void DrawDrop(IClientEntity* pEntity, ClientClass* cClass);

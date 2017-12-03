@@ -1,8 +1,8 @@
-/*#include "RageBot.h"
+#include "RageBot.h"
 #include "RenderManager.h"
 #include "Autowall.h"
 #include "nospread.h"
-//#include "MathFunctions.h"
+#include "MathFunctions.h"
 #include "checksum_md5.h"
 
 
@@ -45,20 +45,6 @@ int C_Random::GenerateRandomNumber()
 	return m_iy;
 }
 
-
-float CNoSpread::sseSqrt(float x)
-{
-	float root = 0.0f;
-
-	__asm
-	{
-		sqrtss xmm0, x
-		movss root, xmm0
-	}
-
-	return root;
-}
-
 float C_Random::RandomFloat(float flLow, float flHigh)
 {
 	float fl = AM * (float)this->GenerateRandomNumber();
@@ -74,7 +60,7 @@ void CNoSpread::CalcClient(Vector vSpreadVec, Vector ViewIn, Vector &ViewOut)
 
 	vecSpreadDir = vecForward + vecRight * -vSpreadVec.x + vecUp * -vSpreadVec.y;
 
-	VectorAngles(vecSpreadDir, ViewOut);
+	AngleVectors(vecSpreadDir, ViewOut);
 
 }
 
@@ -124,6 +110,7 @@ void CNoSpread::GetSpreadVec(CUserCmd*pCmd, Vector &vSpreadVec)
 	vSpreadVec.y = sin(fRandPi1) * fRandInaccuracy + sin(fRandPi2) * fRandSpread;
 
 }
+
 void CNoSpread::AngleVectors(Vector angles, Vector &f)
 {
 	float sp, sy, sr, cp, cy, cr;
@@ -173,6 +160,7 @@ void CNoSpread::AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, 
 		up[2] = cr*cp;
 	}
 }
+
 
 
 void CNoSpread::VectorAngles(const float *forward, float *angles)
@@ -232,7 +220,7 @@ void CNoSpread::CompensateInAccuracyNumeric(CUserCmd*cmd)
 		CalcServer(vSpreadVec, qAntiSpread, vServerSpreadForward);
 
 		Vector qModifer;
-		VectorAngles(vServerSpreadForward, qModifer);
+		AngleVectors(vServerSpreadForward, qModifer);
 
 		qModifer = Aim - qModifer;
 
@@ -368,10 +356,11 @@ void CNoSpread::RollSpread(CBaseCombatWeapon*localWeap, int seed, CUserCmd*cmd, 
 	VectorAngles(vDir, vUp, pflInAngles);
 
 	//pflInAngles.NormalizeAngle();
+	GameUtils::NormaliseViewAngle(pflInAngles);
 	//pflInAngles.ClampAngle();
 
 	pflInAngles[2] += flRoll;
 
 	//pflInAngles.x = AngleNormalize(pflInAngles.x);
 	//pflInAngles.y = AngleNormalize(pflInAngles.y);
-}*/
+}

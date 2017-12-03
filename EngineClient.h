@@ -30,6 +30,10 @@ public:
 		TOTAL,			// must be last and is not a real group
 	};
 
+
+	char _0x0018[20];
+	__int32 m_nOutSequenceNr; //0x0018 
+
 	virtual const char  *GetName(void) const = 0;	// get channel name
 	virtual const char  *GetAddress(void) const = 0; // get channel IP address as string
 	virtual float		GetTime(void) const = 0;	// current net time

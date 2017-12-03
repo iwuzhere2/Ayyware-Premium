@@ -24,10 +24,6 @@ namespace Hooks
 
 float*	FindW2Matrix();
 
-extern float lineLBY;
-extern float lineRealAngle;
-extern float lineFakeAngle;
-
 namespace Resolver
 {
 	extern bool didhitHS;

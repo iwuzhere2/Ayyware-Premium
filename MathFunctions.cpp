@@ -32,6 +32,19 @@ void SinCos(float a, float* s, float*c)
 	*c = cos(a);
 }
 
+float sseSqrt(float x)
+{
+	float root = 0.0f;
+
+	__asm
+	{
+		sqrtss xmm0, x
+		movss root, xmm0
+	}
+
+	return root;
+}
+
 void VectorAngles(Vector forward, Vector &angles)
 {
 	float tmp, yaw, pitch;

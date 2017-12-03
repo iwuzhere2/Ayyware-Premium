@@ -5,6 +5,17 @@
 #include "Chams.h"
 #include "Hooks.h"
 
+extern float rffmove;
+extern float rfsmove;
+extern float new_sidemove;
+extern float new_forwardmove;
+extern int GetItDoubled;
+extern char lby;
+extern char fake;
+extern char real;
+extern float ffake;
+extern float freal;
+
 DWORD GlowManager = *(DWORD*)(Utilities::Memory::FindPatternV2("client.dll", "0F 11 05 ?? ?? ?? ?? 83 C8 01 C7 05 ?? ?? ?? ?? 00 00 00 00") + 3);
 
 #ifdef NDEBUG
@@ -17,6 +28,8 @@ DWORD GlowManager = *(DWORD*)(Utilities::Memory::FindPatternV2("client.dll", "0F
 #define charenc( s ) ( s )
 #define wstrenc( s ) ( s )
 #define wcharenc( s ) ( s )
+#define	MASK_SOLID						(CONTENTS_SOLID|CONTENTS_MOVEABLE|CONTENTS_WINDOW|CONTENTS_MONSTER|CONTENTS_GRATE)
+
 #endif
 
 #ifdef NDEBUG
@@ -40,16 +53,24 @@ void CEsp::Draw()
 {
 	Color Color;
 	IClientEntity *pLocal = hackManager.pLocal();
+	CUserCmd *pCmd;
 
 	for (int i = 0; i < Interfaces::EntList->GetHighestEntityIndex(); i++)
 	{
 		IClientEntity *pEntity = Interfaces::EntList->GetClientEntity(i);
 		player_info_t pinfo;
-		CUserCmd *pCmd;
 		PVOID pebp;
 		__asm mov pebp, ebp;
 		bool* pbSendPacket = (bool*)(*(DWORD*)pebp - 0x1C);
 		bool& bSendPacket = *pbSendPacket;
+
+		if (pEntity && pEntity == pLocal && pEntity->IsDormant())
+		{
+			if (Menu::Window.VisualsTab.FiltersPlayers.GetState() && Interfaces::Engine->GetPlayerInfo(i, &pinfo) && pEntity->IsAlive())
+			{
+				DrawPlayer(pEntity, pinfo, &bSendPacket, pCmd);
+			}
+		}
 
 		if (pEntity &&  pEntity != pLocal && !pEntity->IsDormant())
 		{
@@ -58,12 +79,12 @@ void CEsp::Draw()
 				DWORD m_bSpotted = NetVar.GetNetVar(0x839EB159);
 				*(char*)((DWORD)(pEntity)+m_bSpotted) = 1;
 			}
-
+			
 			if (Menu::Window.VisualsTab.FiltersPlayers.GetState() && Interfaces::Engine->GetPlayerInfo(i, &pinfo) && pEntity->IsAlive())
 			{
 				DrawPlayer(pEntity, pinfo, &bSendPacket, pCmd);
 			}
-
+			
 			ClientClass* cClass = (ClientClass*)pEntity->GetClientClass();
 
 			if (Menu::Window.VisualsTab.FiltersNades.GetState())
@@ -123,6 +144,7 @@ void CEsp::Draw()
 
 	if (Menu::Window.VisualsTab.GrenadeTrace.GetState())
 	{
+		DrawTrace();
 		GrenadeTrace();	
 	}
 }
@@ -162,7 +184,7 @@ void CEsp::DrawPlayer(IClientEntity* pEntity, player_info_t pinfo , bool bSendPa
 		case 0:
 			break;
 		case 1:
-			DrawWeapon(pEntity, Box);
+
 			break;
 		case 2:
 			DrawIcon(pEntity, Box);
@@ -200,6 +222,7 @@ void CEsp::DrawPlayer(IClientEntity* pEntity, player_info_t pinfo , bool bSendPa
 			DrawDistance(Box, pEntity);
 
 			Info(pEntity, Box);
+
 	}
 }
 
@@ -937,4 +960,249 @@ float CEsp::DistanceTo(Vector vecSrc, Vector vecDst)
 		return 1.0f;
 
 	return fDistance;
+}
+
+
+
+void DrawAA(Vector view ,bool &bSendPacket)
+{
+	Vector src3, dst3, f, src, dst;
+	trace_t tf;
+	Ray_t ray;
+	CTraceFilter filter;
+	IClientEntity* plocal = hackManager.pLocal();
+
+	filter.pSkip = hackManager.pLocal();
+	src3 = QAngle(hackManager.pLocal()->GetEyePosition().x, hackManager.pLocal()->GetEyePosition().y - 63, hackManager.pLocal()->GetEyePosition().z);
+	AngleVectors(view, &f);
+	dst3 = src3 + (f * 150.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tf);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tf.endpos, dst))
+		return;
+	if (bSendPacket)
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(255, 0, 0, 255));
+
+	char dcdstf[50];
+	sprintf(dcdstf, "%f", view.y);
+	Render::Text(dst.x, dst.y, Color(255, 0, 0, 255), Render::Fonts::Slider, (dcdstf));
+}
+
+void DrawTrace()
+{
+	Vector src3, dst3, r, f, lby, src, dst;
+	trace_t treal;
+	trace_t tfake;
+	trace_t tlby;
+	Ray_t ray;
+	CTraceFilter filter;
+	IClientEntity* plocal = hackManager.pLocal();
+
+	filter.pSkip = hackManager.pLocal();
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(0, freal, 0), &r);
+	dst3 = src3 + (r * 100.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &treal);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(treal.endpos, dst))
+		return;
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(0, 255, 0, 255));
+	char charreal[3];
+	sprintf(charreal, "%f", freal);
+	Render::Text(dst.x, dst.y, Color(0, 255, 0, 255), Render::Fonts::Slider, (charreal));
+	
+
+	filter.pSkip = hackManager.pLocal();
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(0, ffake, 0), &f);
+	dst3 = src3 + (f * 100.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tfake);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tfake.endpos, dst))
+		return;
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(255, 0, 0, 255));
+	char charfake[3];
+	sprintf(charfake, "%f", ffake);
+	Render::Text(dst.x, dst.y, Color(255, 0, 0, 255), Render::Fonts::Slider, (charfake));
+	
+	filter.pSkip = hackManager.pLocal();
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(0, plocal->GetLowerBodyYaw(), 0), &lby);
+	dst3 = src3 + (lby * 100.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tlby);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tlby.endpos, dst))
+		return;
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(0, 0, 200, 255));
+	char charlby[3];
+	sprintf(charlby, "%f", lby);
+	Render::Text(dst.x, dst.y, Color(0, 0, 200, 255), Render::Fonts::Slider, (charlby));
+
+	
+	
+	
+	
+	
+	/*
+
+	Vector src3, dst3, f, r, l, b, src, dst, df, dr, dl, db;
+	trace_t tf;
+	trace_t tr;
+	trace_t tl;
+	trace_t tb;
+	trace_t tdf;
+	trace_t tdr;
+	trace_t tdl;
+	trace_t tdb;
+	Ray_t ray;
+	CTraceFilter filter;
+	IClientEntity* plocal = hackManager.pLocal();
+
+	filter.pSkip = hackManager.pLocal();
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(20, 0, 0), &f);
+	dst3 = src3 + (f * 150.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tf);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tf.endpos, dst))
+		return;
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(255, 0, 0, 255));
+
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(20, -90, 0), &r);
+	dst3 = src3 + (r * 150.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tr);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tr.endpos, dst))
+		return;
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(0, 0, 255, 255));
+
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(20, 90, 0), &l);
+	dst3 = src3 + (l * 150.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tl);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tl.endpos, dst))
+		return;
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(0, 255, 0, 255));
+
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(20, -180, 0), &b);
+	dst3 = src3 + (b * 150.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tb);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tb.endpos, dst))
+		return;
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(0, 0, 0, 255));
+
+	filter.pSkip = hackManager.pLocal();
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(20, 45, 0), &df);
+	dst3 = src3 + (df * 150.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tdf);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tdf.endpos, dst))
+		return;
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(255, 0, 0, 255));
+
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(20, -45, 0), &dr);
+	dst3 = src3 + (dr * 150.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tdr);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tdr.endpos, dst))
+		return;
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(0, 0, 255, 255));
+
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(20, 135, 0), &dl);
+	dst3 = src3 + (dl * 150.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tdl);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tdl.endpos, dst))
+		return;
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(0, 255, 0, 255));
+
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(20, -135, 0), &db);
+	dst3 = src3 + (db * 150.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tdb);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tdb.endpos, dst))
+		return;
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(0, 0, 0, 255));
+
+	float dstf = ((tf.endpos - plocal->GetEyePosition()).Length() * 3);
+	float dstr = ((tr.endpos - plocal->GetEyePosition()).Length() * 3);
+	float dstb = ((tb.endpos - plocal->GetEyePosition()).Length() * 3);
+	float dstl = ((tl.endpos - plocal->GetEyePosition()).Length() * 3);
+
+	float dstdf = ((tdf.endpos - plocal->GetEyePosition()).Length() * 3);
+	float dstdr = ((tdr.endpos - plocal->GetEyePosition()).Length() * 3);
+	float dstdb = ((tdb.endpos - plocal->GetEyePosition()).Length() * 3);
+	float dstdl = ((tdl.endpos - plocal->GetEyePosition()).Length() * 3);
+
+
+	//d
+
+	char dcdstf[50];
+	char dcdstr[50];
+	char dcdstb[50];
+	char dcdstl[50];
+
+	sprintf(dcdstf, "%f", dstdf);
+	sprintf(dcdstr, "%f", dstdr);
+	sprintf(dcdstb, "%f", dstdb);
+	sprintf(dcdstl, "%f", dstdl);
+
+
+	char cdstf[50];
+	char cdstr[50];
+	char cdstb[50];
+	char cdstl[50];
+
+	sprintf(cdstf, "%f", dstf);
+	sprintf(cdstr, "%f", dstr);
+	sprintf(cdstb, "%f", dstb);
+	sprintf(cdstl, "%f", dstl);
+
+
+
+
+	Render::Text(7, 75, Color(255, 0, 0, 255), Render::Fonts::Slider, (cdstf));
+	Render::Text(7, 92, Color(0, 0, 255, 255), Render::Fonts::Slider, (cdstr));
+	Render::Text(7, 109, Color(255, 255, 255, 255), Render::Fonts::Slider, (cdstb));
+	Render::Text(7, 126, Color(0, 255, 0, 255), Render::Fonts::Slider, (cdstl));
+	Render::Text(80, 75, Color(255, 0, 0, 255), Render::Fonts::Slider, (dcdstf));
+	Render::Text(80, 92, Color(0, 0, 255, 255), Render::Fonts::Slider, (dcdstr));
+	Render::Text(80, 109, Color(255, 255, 255, 255), Render::Fonts::Slider, (dcdstb));
+	Render::Text(80, 126, Color(0, 255, 0, 255), Render::Fonts::Slider, (dcdstl));
+
+	char fmove[50];
+	char smove[50];
+
+	char realfmove[50];
+	char realsmove[50];
+
+	sprintf(fmove, "%f", rffmove);
+	sprintf(smove, "%f", rfsmove);
+	sprintf(realfmove, "%f", new_forwardmove);
+	sprintf(realsmove, "%f", new_sidemove);
+	Render::Text(7, 143, Color(0, 0, 0, 255), Render::Fonts::Slider, "pCmd->move");
+	Render::Text(7, 160, Color(150, 0, 0, 255), Render::Fonts::Slider, (realfmove));
+	Render::Text(7, 177, Color(0, 150, 0, 255), Render::Fonts::Slider, (realsmove));
+
+	*/
 }

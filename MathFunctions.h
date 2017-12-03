@@ -20,6 +20,7 @@ void CalcAngle(Vector src, Vector dst, Vector &angles);
 bool IsVisible(IClientEntity* pLocal, IClientEntity* pEntity, int BoneID);
 void CalcAngleYawOnly(Vector src, Vector dst, Vector &angles);
 void NormalizeVector(Vector& vec);
+float sseSqrt(float x);
 
 inline Vector angle_vector(Vector meme)
 {

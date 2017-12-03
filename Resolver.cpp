@@ -2,6 +2,8 @@
 #include "Ragebot.h"
 #include "Hooks.h"
 
+int i = 0;
+
 void LowerBodyYawFix(IClientEntity* pEntity)
 {
 	if (Menu::Window.RageBotTab.LowerbodyFix.GetState())
@@ -74,8 +76,10 @@ bool IsFakeWalking(IClientEntity* pEntity) {
 // Resolver ---------------------------------
 
 
+
 void ResolverSetup::Resolve(IClientEntity* pEntity)
 {
+	int brutetick = 0;
 	bool MeetsLBYReq;
 	if (pEntity->GetFlags() & FL_ONGROUND)
 		MeetsLBYReq = true;
@@ -88,7 +92,7 @@ void ResolverSetup::Resolve(IClientEntity* pEntity)
 	else
 		IsMoving = false;
 
-	int i = 0;
+	
 
 	ResolverSetup::NewANgles[pEntity->GetIndex()] = *pEntity->GetEyeAnglesXY();
 	ResolverSetup::newlby[pEntity->GetIndex()] = pEntity->GetLowerBodyYaw();
@@ -169,43 +173,36 @@ void ResolverSetup::Resolve(IClientEntity* pEntity)
 	}
 	else if (Menu::Window.RageBotTab.AimbotResolver.GetIndex() == 4)//level 4
 	{
-		if (IsMovingOnGround(pEntity) && !IsFakeWalking(pEntity)) {
-			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw();
-		}
-		else 
+
+		switch ((Globals::Shots) % 9)
 		{
-			if (ResolverSetup::lbydif[pEntity->GetIndex()] >= 20.f)
-			{
-				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() - 30.f;
-			}
-			else if (ResolverSetup::lbydif[pEntity->GetIndex()] >= 70.f)
-			{
-				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() - 90.f;
-			}
-			else if (ResolverSetup::lbydif[pEntity->GetIndex()] >= 125.f)
-			{
-				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() - 130.f;
-			}
-			else if (ResolverSetup::lbydif[pEntity->GetIndex()] >= 170.f)
-			{
-				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() - 180.f;
-			}
-			else if (ResolverSetup::lbydif[pEntity->GetIndex()] <= -170.f)
-			{
-				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 30.f;
-			}
-			else if (ResolverSetup::lbydif[pEntity->GetIndex()] <= -125.f)
-			{
-				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 130.f;
-			}
-			else if (ResolverSetup::lbydif[pEntity->GetIndex()] <= -70.f)
-			{
-				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 90.f;
-			}
-			else if (ResolverSetup::lbydif[pEntity->GetIndex()] <= -20.f)
-			{
-				pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 30.f;
-			}
+		case 0:
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 180;
+			break;
+		case 1: 
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw();
+			break;
+		case 2:
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 45;
+			break;
+		case 3:
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() - 90;
+			break;
+		case 4:
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 135;
+			break;
+		case 5:
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() - 180;
+			break;
+		case 6:
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 135;
+			break;
+		case 7:
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() - 90;
+			break;
+		case 8:
+			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 45;
+			break;
 		}
 	}
 	//LowerBodyYawFix(pEntity);

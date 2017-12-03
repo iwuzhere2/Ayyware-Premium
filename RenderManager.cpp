@@ -34,6 +34,7 @@ namespace Render
 		DWORD Clock;
 		DWORD LBY;
 		DWORD Tabs;
+		DWORD aa;
 	};
 };
 
@@ -68,6 +69,7 @@ void Render::Initialise()
 	Fonts::Slider = Interfaces::Surface->FontCreate();
 	Fonts::Clock = Interfaces::Surface->FontCreate();
 	Fonts::LBY = Interfaces::Surface->FontCreate();
+	Fonts::aa = Interfaces::Surface->FontCreate();
 	Fonts::Tabs = Interfaces::Surface->FontCreate();
 
 	Interfaces::Surface->SetFontGlyphSet(Fonts::Menu, "DINPro-Regular", 14, 500, 0, 0, FONTFLAG_ANTIALIAS);
@@ -77,6 +79,7 @@ void Render::Initialise()
 	Interfaces::Surface->SetFontGlyphSet(Fonts::MenuText, "Calibri", 16, 500, 0, 0, FONTFLAG_ANTIALIAS);
 	Interfaces::Surface->SetFontGlyphSet(Fonts::MenuTabs, "MyScriptFont", 18, 600, 0, 0, FONTFLAG_ANTIALIAS | FONTFLAG_DROPSHADOW);
 	Interfaces::Surface->SetFontGlyphSet(Fonts::Slider, "Arial", 17, 600, 0, 0, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
+	Interfaces::Surface->SetFontGlyphSet(Fonts::aa, "Arial", 8, 600, 0, 0, FONTFLAG_ANTIALIAS );
 	Interfaces::Surface->SetFontGlyphSet(Fonts::Clock, "Arial", 22, 600, 0, 0, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
 	Interfaces::Surface->SetFontGlyphSet(Fonts::Tabs, "MyScriptFont", 50, 600, 0, 0, FONTFLAG_ANTIALIAS | FONTFLAG_DROPSHADOW);
 	Interfaces::Surface->SetFontGlyphSet(Fonts::LBY, "Verdana", 20, 800, 0, 0, FONTFLAG_OUTLINE | FONTFLAG_ANTIALIAS);

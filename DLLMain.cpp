@@ -18,9 +18,6 @@
 
 extern HINSTANCE hAppInstance;
 
-float lineLBY;
-float lineRealAngle;
-float lineFakeAngle;
 int ResolverStage[65];
 bool canBacktrack;
 bool BacktrackCanShotEnemy;

@@ -215,6 +215,7 @@ public:
 	CCheckBox FiltersChickens;
 	CCheckBox FiltersNades;
 	CCheckBox FiltersC4;
+	CCheckBox Filtersown;
 
 	CGroupBox OtherGroup;
 	CComboBox OtherCrosshair;
@@ -414,6 +415,7 @@ public:
 	CMiscTab MiscTab;
 	CColorTab ColorsTab;
 	CSkinchangerTab SkinchangerTab;
+	//CPlayersTab PlayerList;
 
 	CButton SaveButton1;
 	CButton LoadButton1;
@@ -426,7 +428,19 @@ public:
 	CButton FirstButton;
 	CComboBox ConfigBox;
 };
-
+/*
+class CPlayersTab : public CWindow
+{
+public:
+	void Setup();
+	CComboBox pListGroup;
+	CComboBox pListPlayers;
+	CGroupBox OptionsGroup;
+	CButton OptionsFriendly;
+	CButton OptionsAimPrio;
+	CButton OptionsCalloutSpam;
+};
+*/
 namespace Menu
 {
 	void SetupMenu();

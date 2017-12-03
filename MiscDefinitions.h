@@ -104,7 +104,7 @@ typedef struct player_info_s
 	DWORD __pad0[2];
 	int xuidlow;
 	int xuidhigh;
-	char name[128];//32
+	char name[512];//32
 	int userid;
 	char steamid[33];//32
 	UINT steam3id;

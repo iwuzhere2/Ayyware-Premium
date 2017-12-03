@@ -7,8 +7,9 @@
 #define rad(a) a * 0.01745329251
 #define deg(a) a * 57.295779513082
 
-
-
+typedef float vec_t;
+typedef float vec2_t[2];
+typedef float vec3_t[3];
 
 #include <Windows.h>
 #include <math.h>
@@ -113,9 +114,6 @@ inline void SinCosX(const float rad, float &sin, float &cos)
 
 #define  FORCEINLINE			__forceinline
 
-typedef float vec_t;
-typedef float vec2_t[2];
-typedef float vec3_t[3];
 
 inline vec_t BitsToFloat(unsigned long i)
 {
@@ -175,6 +173,9 @@ public:
 	FORCEINLINE Vector& operator+=(float fl);
 	FORCEINLINE Vector& operator-=(float fl);
 	inline float Long() { return sqrt2(x*x + y*y + z*z); }
+
+	operator float *() { return &x; } // Vectors will now automatically convert to float * when needed
+	operator const float *() const { return &x; }
 
 	void Negate();
 

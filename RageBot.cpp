@@ -5,7 +5,8 @@
 #include <iostream>
 #include "UTIL Functions.h"
 #include "nospread.h"
-#define M_PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679
+#include "ESP.h"
+#define M_PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679f
 
 void CRageBot::Init()
 {
@@ -49,7 +50,7 @@ float hitchance(IClientEntity* pLocal, CBaseCombatWeapon* pWeapon)
 	return hitchance;
 }
 
-/*void CRageBot::DoNoSpread(CUserCmd *pCmd)
+void CRageBot::DoNoSpread(CUserCmd *pCmd)
 {
 	CBaseCombatWeapon* pWeapon = (CBaseCombatWeapon*)Interfaces::EntList->GetClientEntityFromHandle(hackManager.pLocal()->GetActiveWeaponHandle());
 
@@ -57,7 +58,7 @@ float hitchance(IClientEntity* pLocal, CBaseCombatWeapon* pWeapon)
 	{
 		NoSpread.RollSpread(pWeapon, pCmd->random_seed, pCmd, pCmd->viewangles);
 	}
-}*/
+}
 
 bool CanOpenFire()
 {
@@ -84,6 +85,11 @@ void CRageBot::Move(CUserCmd *pCmd, bool &bSendPacket)
 	if (!Menu::Window.RageBotTab.Active.GetState())
 		return;
 
+	if (Menu::Window.RageBotTab.AimbotEnable.GetState())
+		DoAimbot(pCmd, bSendPacket);
+
+	if (Menu::Window.RageBotTab.AccuracyRecoil.GetState())
+		DoNoRecoil(pCmd);
 	if (Menu::Window.RageBotTab.AntiAimEnable.GetState())
 	{
 		static int ChokedPackets = -1;
@@ -106,11 +112,7 @@ void CRageBot::Move(CUserCmd *pCmd, bool &bSendPacket)
 		}
 	}
 
-	if (Menu::Window.RageBotTab.AimbotEnable.GetState())
-		DoAimbot(pCmd, bSendPacket);
-
-	if (Menu::Window.RageBotTab.AccuracyRecoil.GetState())
-		DoNoRecoil(pCmd);
+	
 
 	if (Menu::Window.RageBotTab.AimbotAimStep.GetState())
 	{
@@ -143,6 +145,44 @@ Vector BestPoint(IClientEntity *targetPlayer, Vector &final)
 	return final;
 }
 
+template<class T, class U>
+T clamp(T in, U low, U high)
+{
+	if (in <= low)
+		return low;
+
+	if (in >= high)
+		return high;
+
+	return in;
+}
+
+float LagFix()
+{
+	float updaterate = Interfaces::CVar->FindVar("cl_updaterate")->fValue;
+	ConVar* minupdate = Interfaces::CVar->FindVar("sv_minupdaterate");
+	ConVar* maxupdate = Interfaces::CVar->FindVar("sv_maxupdaterate");
+
+	if (minupdate && maxupdate)
+		updaterate = maxupdate->fValue;
+
+	float ratio = Interfaces::CVar->FindVar("cl_interp_ratio")->fValue;
+
+	if (ratio == 0)
+		ratio = 1.0f;
+
+	float lerp = Interfaces::CVar->FindVar("cl_interp")->fValue;
+	ConVar* cmin = Interfaces::CVar->FindVar("sv_client_min_interp_ratio");
+	ConVar* cmax = Interfaces::CVar->FindVar("sv_client_max_interp_ratio");
+
+	if (cmin && cmax && cmin->fValue != 1)
+		ratio = clamp(ratio, cmin->fValue, cmax->fValue);
+
+
+	return max(lerp, ratio / updaterate);
+}
+
+
 void CRageBot::DoAimbot(CUserCmd *pCmd, bool &bSendPacket)
 {
 	IClientEntity* pTarget = nullptr;
@@ -154,7 +194,7 @@ void CRageBot::DoAimbot(CUserCmd *pCmd, bool &bSendPacket)
 
 	CBaseCombatWeapon* pWeapon = (CBaseCombatWeapon*)Interfaces::EntList->GetClientEntityFromHandle(pLocal->GetActiveWeaponHandle());
 	if (pWeapon)
-	{
+	{ 
 		if (pWeapon->GetAmmoInClip() == 0 || !GameUtils::IsBallisticWeapon(pWeapon))
 		{
 			return;
@@ -285,9 +325,13 @@ void CRageBot::DoAimbot(CUserCmd *pCmd, bool &bSendPacket)
 			{
 				if (AimAtPoint(pLocal, Point, pCmd, bSendPacket, pWeapon))
 				{
+
 					if (Menu::Window.RageBotTab.AimbotAutoFire.GetState() && !(pCmd->buttons & IN_ATTACK))
 					{
 						pCmd->buttons |= IN_ATTACK;
+
+						if (Menu::Window.RageBotTab.AccuracySpread.GetState())
+							DoNoSpread(pCmd);
 					}
 					else
 					{
@@ -771,7 +815,7 @@ bool CRageBot::AimAtPoint(IClientEntity* pLocal, Vector point, CUserCmd *pCmd, b
 	VectorAngles(point - pLocal->GetEyePosition(), vAimAngle);
 
 	//CalcAngle(src, point, angles);  --Avoz
-	GameUtils::NormaliseViewAngle(angles);
+	GameUtils::NormaliseViewAngle(vAimAngle);
 
 	//if (angles[0] != angles[0] || angles[1] != angles[1])
 	//{
@@ -871,96 +915,35 @@ namespace AntiAims
 	void killLBY(CUserCmd *pCmd, bool &bSendPacket)
 	{
 		IClientEntity* LocalPlayer = hackManager.pLocal();
-		float angle;
-		float anglex2;
-		int i = 0;
-
-		angle = 34;
-		anglex2 = angle * 2;
 		
 		if (LocalPlayer->GetFlags() & FL_ONGROUND)
 		{
-			if (i == 0)
-			{
-				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + angle;
-				i++;
-			}
-			if (i == 1)
-			{
-				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() - anglex2;
-				i++;
-			}
-			if (i == 2)
-			{
-				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + anglex2;
-				i = 1;
-			}
+			pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() - 90;
 		}
 		else
 		{
-			pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + 180.f;
-			i = 0;
+			pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + 45;
 		}
 	}
 
 	void fakeLBYDMG(CUserCmd *pCmd, bool &bSendPacket)
 	{
 		IClientEntity* LocalPlayer = hackManager.pLocal();
-		float angle;
-		angle = rand() % 34 + 1;
-		bool flipy;
-		if (LocalPlayer->GetFlags() & FL_ONGROUND)
-		{
-			if (flipy)
-			{
-				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + angle + 180.f;
-			}
-			if (!flipy)
-			{
-				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() - angle + 180.f;
-			}
-			flipy = !flipy;
-		}
-		else
-		{
-			pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() - angle;
-		}
+		static float spin = 0.f;
+		spin += 10;
+		pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + spin - 40;
+		if (spin > 360.f)
+			spin = 0.f;
 	}
 
 	void LBYDMG(CUserCmd *pCmd, bool &bSendPacket, bool NextLBYUpdate())
 	{
-		int real = -1;
 		IClientEntity* LocalPlayer = hackManager.pLocal();
-		bSendPacket = true;
-		if (LocalPlayer->GetFlags() & FL_ONGROUND && bSendPacket)
-		{
-			pCmd->viewangles.y = hackManager.pLocal()->GetLowerBodyYaw() + 180.f;
-			real++;
-			bSendPacket = false;
-		}
-		else if (LocalPlayer->GetFlags() & FL_ONGROUND && !bSendPacket)
-		{
-			pCmd->viewangles.y = hackManager.pLocal()->GetLowerBodyYaw() + 33.f;
-			real++;
-			bSendPacket = true;
-		}
-		else if (LocalPlayer->GetFlags() & !FL_ONGROUND && bSendPacket)
-		{
-			pCmd->viewangles.y = hackManager.pLocal()->GetLowerBodyYaw() - 33.f;
-			real++;
-			bSendPacket = false;
-		}
-		else
-		{
-			pCmd->viewangles.y = hackManager.pLocal()->GetLowerBodyYaw() - 66.f;
-			real++;
-			bSendPacket = true;
-		}
-		
-		if (real == 7)
-		{
-			real = -1;
-		}
+		static float spin = 0.f;
+		spin += 10;
+		pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() - spin + 40;
+		if (spin > 360.f)
+			spin = 0.f;
 	}
 
 

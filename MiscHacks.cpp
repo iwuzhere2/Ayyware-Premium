@@ -3,8 +3,15 @@
 #include "MiscHacks.h"
 #include "Interfaces.h"
 #include "RenderManager.h"
+#include "ESP.h"
 
 #include <time.h>
+
+float rffmove = 0;
+float rfsmove = 0;
+float new_sidemove;
+float new_forwardmove;
+int GetItDoubled;
 
 template<class T, class U>
 inline T clamp(T in, U low, U high)
@@ -81,7 +88,7 @@ void CMiscHacks::Move(CUserCmd *pCmd, bool &bSendPacket)
 		FakeWalk(pCmd, bSendPacket);
 
 	if (Menu::Window.MiscTab.OtherSlowMotion.GetKey())
-		SlowMo(pCmd);
+		SlowMo(pCmd, bSendPacket);
 
 	if (Menu::Window.MiscTab.AutoPistol.GetState())
 		AutoPistol(pCmd);
@@ -198,17 +205,29 @@ void CMiscHacks::FakeWalk(CUserCmd* pCmd, bool &bSendPacket)
 	}
 }
 
-void CMiscHacks::SlowMo(CUserCmd *pCmd)
+void CMiscHacks::SlowMo(CUserCmd *pCmd, bool &bSendPacket)
 {
 	int SlowMotionKey = Menu::Window.MiscTab.OtherSlowMotion.GetKey();
+	Vector src3, dst3, src, dst, f;
+	trace_t tf;
+	Ray_t ray;
+	CTraceFilter filter;
+	IClientEntity* plocal = hackManager.pLocal();
+
 	if (SlowMotionKey > 0 && GUI.GetKeyState(SlowMotionKey))
 	{
-		static bool slowmo;
-		slowmo = !slowmo;
-		if (slowmo)
-		{
-			pCmd->tick_count = INT_MAX;
-		}
+		filter.pSkip = hackManager.pLocal();
+		src3 = hackManager.pLocal()->GetEyePosition();
+		AngleVectors(QAngle(90, 0, 0), &f);
+		dst3 = src3 + (f * 65.f);
+		ray.Init(src3, dst3);
+		Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tf);
+
+		float gdist = ((tf.endpos - plocal->GetEyePosition()).Length());
+		if (gdist < 64)
+			bSendPacket = false;
+		else
+			bSendPacket = true;
 	}
 }
 
@@ -292,58 +311,209 @@ void CMiscHacks::NameSteal()
 
 	start_t = clock();
 }
+	/*Vector src3, dst3, f, r, l, b, src, dst;
+	trace_t tf;
+	trace_t tr;
+	trace_t tl;
+	trace_t tb;
+	Ray_t ray;
+	CTraceFilter filter;
+	IClientEntity* plocal = hackManager.pLocal();
 
-void CMiscHacks::RotateMovement(CUserCmd* pCmd, float rotation)
-{
-	rotation = DEG2RAD(rotation);
+	filter.pSkip = hackManager.pLocal();
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(0, 0, 0), &f);
+	dst3 = src3 + (f * 200.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tf);
 
-	float cos_rot = cos(rotation);
-	float sin_rot = sin(rotation);
-
-	float new_forwardmove = (cos_rot * pCmd->forwardmove) - (sin_rot * pCmd->sidemove);
-	float new_sidemove = (sin_rot * pCmd->forwardmove) + (cos_rot * pCmd->sidemove);
-
-	pCmd->forwardmove = new_forwardmove;
-	pCmd->sidemove = new_sidemove;
-}
-
-bool CMiscHacks::CircularStrafe(CUserCmd* pCmd, Vector& OriginalView)
-{
-	if (!(Menu::Window.MiscTab.OtherCircleStrafe.GetState()))
-		return false;
-
-	IClientEntity* pLocalEntity = Interfaces::EntList->GetClientEntity(Interfaces::Engine->GetLocalPlayer());
-
-	if (!pLocalEntity)
-		return false;
-
-	if (!pLocalEntity->IsAlive())
-		return false;
-
-
-	/*
-	OtherCircleSlider
-
-	Menu::Window.MiscTab.OtherCircleStrafe.
-	*/
-	CircleFactor++;
-	int GetItDoubled = Menu::Window.MiscTab.OtherCircleSlider.GetValue() * CircleFactor - Interfaces::Globals->interval_per_tick;
-	if (CircleFactor > 360)
-		CircleFactor = 0;
-
-
-	Vector StoredViewAngles = pCmd->viewangles;
-
-	int CIRCLEKey = Menu::Window.MiscTab.OtherCircleButton.GetKey();
-
-	if (CIRCLEKey > 0 && GUI.GetKeyState(CIRCLEKey))
-	{
-		pCmd->viewangles = OriginalView;
-		RotateMovement(pCmd, GetItDoubled);
-	}
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(0, -90, 0), &r);
+	dst3 = src3 + (r * 200.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tr);
 	
-	return true;
-}
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(0, 90, 0), &l);
+	dst3 = src3 + (l * 200.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tl);
+
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(0, 180, 0), &b);
+	dst3 = src3 + (b * 200.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tb);
+
+	float dstf = ((tf.endpos - plocal->GetEyePosition()).Length() / 200.f);
+	float dstr = ((tr.endpos - plocal->GetEyePosition()).Length() / 200.f);
+	float dstb = ((tb.endpos - plocal->GetEyePosition()).Length() / 200.f);
+	float dstl = ((tl.endpos - plocal->GetEyePosition()).Length() / 200.f);*/
+
+	void CMiscHacks::RotateMovement(CUserCmd* pCmd, float rotation)
+	{
+
+		Vector src3, dst3, f, r, l, b, src, dst, df, dr, dl, db;
+		trace_t tf;
+		trace_t tr;
+		trace_t tl;
+		trace_t tb;
+		trace_t tdf;
+		trace_t tdr;
+		trace_t tdl;
+		trace_t tdb;
+		Ray_t ray;
+		CTraceFilter filter;
+		IClientEntity* plocal = hackManager.pLocal();
+
+		filter.pSkip = hackManager.pLocal();
+		src3 = hackManager.pLocal()->GetEyePosition();
+		AngleVectors(QAngle(20, 0, 0), &f);
+		dst3 = src3 + (f * 150.f);
+		ray.Init(src3, dst3);
+		Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tf);
+
+		src3 = hackManager.pLocal()->GetEyePosition();
+		AngleVectors(QAngle(20, -90, 0), &r);
+		dst3 = src3 + (r * 150.f);
+		ray.Init(src3, dst3);
+		Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tr);
+
+		src3 = hackManager.pLocal()->GetEyePosition();
+		AngleVectors(QAngle(20, 90, 0), &l);
+		dst3 = src3 + (l * 150.f);
+		ray.Init(src3, dst3);
+		Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tl);
+
+		src3 = hackManager.pLocal()->GetEyePosition();
+		AngleVectors(QAngle(20, -180, 0), &b);
+		dst3 = src3 + (b * 150.f);
+		ray.Init(src3, dst3);
+		Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tb);
+
+		float dstf = ((tf.endpos - plocal->GetEyePosition()).Length() * 3);
+		float dstr = ((tr.endpos - plocal->GetEyePosition()).Length() * 3);
+		float dstb = ((tb.endpos - plocal->GetEyePosition()).Length() * 3);
+		float dstl = ((tl.endpos - plocal->GetEyePosition()).Length() * 3);
+		//diagunal
+
+
+		filter.pSkip = hackManager.pLocal();
+		src3 = hackManager.pLocal()->GetEyePosition();
+		AngleVectors(QAngle(20, 45, 0), &df);
+		dst3 = src3 + (df * 150.f);
+		ray.Init(src3, dst3);
+		Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tdf);
+
+		src3 = hackManager.pLocal()->GetEyePosition();
+		AngleVectors(QAngle(20, -45, 0), &dr);
+		dst3 = src3 + (dr * 150.f);
+		ray.Init(src3, dst3);
+		Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tdr);
+
+		src3 = hackManager.pLocal()->GetEyePosition();
+		AngleVectors(QAngle(20, 135, 0), &dl);
+		dst3 = src3 + (dl * 150.f);
+		ray.Init(src3, dst3);
+		Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tdl);
+
+		src3 = hackManager.pLocal()->GetEyePosition();
+		AngleVectors(QAngle(20, -135, 0), &db);
+		dst3 = src3 + (db * 150.f);
+		ray.Init(src3, dst3);
+		Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tdb);
+
+
+		float dstdf = ((tdf.endpos - plocal->GetEyePosition()).Length() * 3);
+		float dstdr = ((tdr.endpos - plocal->GetEyePosition()).Length() * 3);
+		float dstdb = ((tdb.endpos - plocal->GetEyePosition()).Length() * 3);
+		float dstdl = ((tdl.endpos - plocal->GetEyePosition()).Length() * 3);
+
+		rotation = DEG2RAD(rotation);
+
+		float cos_rot = cos(rotation);
+		float sin_rot = sin(rotation);
+
+		new_forwardmove = (cos_rot * pCmd->forwardmove) - (sin_rot * pCmd->sidemove);
+		new_sidemove = (sin_rot * pCmd->forwardmove) + (cos_rot * pCmd->sidemove);
+
+		if (dstf < 440)
+		{
+			new_forwardmove = new_forwardmove + (dstf - 440);
+			new_sidemove = new_sidemove + (dstf - 440);
+		}
+		if (dstr < 440)
+		{
+			new_forwardmove = new_forwardmove + (dstr - 440);
+			new_sidemove = new_sidemove - (dstr - 440);
+		}
+		if (dstl < 440)
+		{
+			new_forwardmove = new_forwardmove + (dstl - 440);
+			new_sidemove = new_sidemove + (dstl - 440);
+		}
+		if (dstb < 440)
+		{
+			new_forwardmove = new_forwardmove + (dstb - 440);
+			new_sidemove = new_sidemove + (dstb - 440);
+		}
+		
+		if (dstdf < 440) 
+		{
+			new_forwardmove = new_forwardmove + (dstdf - 440);
+			new_sidemove = new_sidemove + (dstdf - 440);
+		}
+		if (dstdr < 440)
+		{
+			new_forwardmove = new_forwardmove + (dstdr - 440);
+			new_sidemove = new_sidemove - (dstdr - 440);
+		}
+		if (dstdl < 440)
+		{
+			new_forwardmove = new_forwardmove + (dstdl - 440);
+			new_sidemove = new_sidemove + (dstdl - 440);
+		}
+		if (dstdb < 440)
+		{
+			new_forwardmove = new_forwardmove + (dstdb - 440);
+			new_sidemove = new_sidemove + (dstdb - 440);
+		}
+		
+		pCmd->forwardmove = new_forwardmove;
+		pCmd->sidemove = new_sidemove;
+
+
+	}
+
+	bool CMiscHacks::CircularStrafe(CUserCmd* pCmd, Vector& OriginalView)
+	{
+		if (!(Menu::Window.MiscTab.OtherCircleStrafe.GetState()))
+			return false;
+
+		IClientEntity* pLocalEntity = Interfaces::EntList->GetClientEntity(Interfaces::Engine->GetLocalPlayer());
+
+		if (!pLocalEntity)
+			return false;
+
+		if (!pLocalEntity->IsAlive())
+			return false;
+
+		CircleFactor++;
+		if (CircleFactor > 360)
+			CircleFactor = 0;
+		GetItDoubled = 2.0 * CircleFactor - Interfaces::Globals->interval_per_tick;
+
+		Vector StoredViewAngles = pCmd->viewangles;
+
+		int CIRCLEKey = Menu::Window.MiscTab.OtherCircleButton.GetKey();
+
+		if (CIRCLEKey > 0 && GUI.GetKeyState(CIRCLEKey))
+		{
+			pCmd->viewangles = OriginalView;
+			RotateMovement(pCmd, GetItDoubled);
+		}
+		return true;
+	}
 
 void CMiscHacks::AutoJump(CUserCmd *pCmd)
 {

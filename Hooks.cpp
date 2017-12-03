@@ -14,6 +14,11 @@
 #include <intrin.h>
 #include "EngineClient.h"
 
+char lby[50];
+char fake[50];
+char real[50];
+float ffake;
+float freal; 
 
 #define TICK_INTERVAL			( Interfaces::Globals->interval_per_tick )
 #define TIME_TO_TICKS( dt )		( (int)( 0.5f + (float)(dt) / TICK_INTERVAL ) )
@@ -142,16 +147,16 @@ const char* clantaganimation[18] =
 		"          ",
 		"         s",
 		"        sk",
-		"       ske",
-		"      skee",
-		"     skeet",
-		"    skeet.",
-		"   skeet.c",
-		" skeet.cc",
-		"skeet.cc ",
-		"keet.cc  ",
-		"eet.cc   ",
-		"et.cc    ",
+		"       sko",
+		"      skoo",
+		"     skoot",
+		"    skoot.",
+		"   skoot.c",
+		" skoot.cc",
+		"skoot.cc ",
+		"koot.cc  ",
+		"oot.cc   ",
+		"ot.cc    ",
 		"t.cc     ",
 		".cc      ",
 		"cc       ",
@@ -243,7 +248,6 @@ float* FindW2Matrix()
 
 
 
-bool sendpacket = true;
 bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 {
 	if (!pCmd->command_number)
@@ -251,36 +255,46 @@ bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 
 	if (Interfaces::Engine->IsConnected() && Interfaces::Engine->IsInGame())
 	{
-
-
 		PVOID pebp;
 		__asm mov pebp, ebp;
 		bool* pbSendPacket = (bool*)(*(DWORD*)pebp - 0x1C);
 		bool& bSendPacket = *pbSendPacket;
-
+		
 		Vector origView = pCmd->viewangles;
 		Vector viewforward, viewright, viewup, aimforward, aimright, aimup;
 		Vector qAimAngles;
 		qAimAngles.Init(0.0f, pCmd->viewangles.y, 0.0f);
 		AngleVectors(qAimAngles, &viewforward, &viewright, &viewup);
 		//int tick = pCmd->tick_count;
-		/*
-		if (hackManager.pLocal()->IsAlive() && Menu::Window.VisualsTab.BulletTrace.GetState())
-		{
-			lineLBY = hackManager.pLocal()->GetLowerBodyYaw();
-			
-			if (bSendPacket == true) {
-				lineFakeAngle = pCmd->viewangles.y;
-			}
-			else {
-				lineRealAngle = pCmd->viewangles.y;
-			}
-		}
-		*/
 		IClientEntity* pEntity;
 		IClientEntity *pLocal = Interfaces::EntList->GetClientEntity(Interfaces::Engine->GetLocalPlayer());
 		if (Interfaces::Engine->IsConnected() && Interfaces::Engine->IsInGame() && pLocal && pLocal->IsAlive())
 		{
+
+			/*
+			static int op4 = 0;
+
+			static int saveval4 = 0;
+			auto nci4 = Interfaces::Engine->GetNetChannelInfo();
+
+			static bool activate = false;
+			if (GetAsyncKeyState(0x48))//H
+				activate ^= 1;
+
+			if (activate && !saveval4) {
+				saveval4 = nci4->m_nOutSequenceNr;
+				nci4->m_nOutSequenceNr = -1;
+				op4 = 1;
+			}
+			if (saveval4 && !op4) {
+				nci4->m_nOutSequenceNr = saveval4 + 2;
+				saveval4 = 0;
+			}
+			if (op4 > 0)
+				nci4->m_nOutSequenceNr = -1,
+				bSendPacket = false,
+				op4--;
+				*/
 			Hacks::MoveHacks(pCmd, bSendPacket);
 			ResolverSetup::GetInst().CM(pEntity);
 		}
@@ -522,12 +536,12 @@ bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 				pCmd->viewangles.z = 0.00;
 			}
 
-			if (pCmd->viewangles.x < -89 || pCmd->viewangles.x > 89 || pCmd->viewangles.y < -180 || pCmd->viewangles.y > 180)
+			if (pCmd->viewangles.x < -90 || pCmd->viewangles.x > 90 || pCmd->viewangles.y < -180 || pCmd->viewangles.y > 180)
 			{
 				Utilities::Log("Having to re-normalise!");
 				GameUtils::NormaliseViewAngle(pCmd->viewangles);
 				Beep(750, 800); 
-				if (pCmd->viewangles.x < -89 || pCmd->viewangles.x > 89 || pCmd->viewangles.y < -180 || pCmd->viewangles.y > 180)
+				if (pCmd->viewangles.x < -90 || pCmd->viewangles.x > 90 || pCmd->viewangles.y < -180 || pCmd->viewangles.y > 180)
 				{
 					pCmd->viewangles = origView;
 					pCmd->sidemove = right;
@@ -546,8 +560,19 @@ bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 			pCmd->forwardmove = -pCmd->forwardmove;
 		}
 
-		if (bSendPacket)
-			LastAngleAA = pCmd->viewangles;
+		if (Menu::Window.VisualsTab.BulletTrace.GetState())
+		{
+			if (bSendPacket)
+			{
+				sprintf(fake, "%f", pCmd->viewangles.y);
+				ffake = pCmd->viewangles.y;
+			}
+			else
+			{
+				sprintf(real, "%f", pCmd->viewangles.y);
+				freal = pCmd->viewangles.y;
+			}
+		}
 	}
 
 	return false;
@@ -573,7 +598,7 @@ bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 		}
 	}
 }
-
+bool sendpacket = true;
 void FakeLag(CUserCmd* pCmd)
 {
 
@@ -679,20 +704,12 @@ void __fastcall PaintTraverse_Hooked(PVOID pPanels, int edx, unsigned int vguiPa
 	{
 		if (Menu::Window.VisualsTab.Clock.GetState())
 		{
-			char lby[50];
-			char fake[50];
-			char real[50];
-
-			if (sendpacket)
-				sprintf(real, "%f", hackManager.pLocal()->GetEyeAnglesXY()->y);
-			else
-				sprintf(fake, "%f", hackManager.pLocal()->GetEyeAnglesXY()->y);
-
 			sprintf(lby, "%f", hackManager.pLocal()->GetLowerBodyYaw());
 			Render::Text(7, 24, Color(0, 114, 225, 255), Render::Fonts::Slider, (lby));
 			Render::Text(7, 41, Color(255, 0, 0, 255), Render::Fonts::Slider, (fake));
 			Render::Text(7, 58, Color(0, 255, 0, 255), Render::Fonts::Slider, (real));
 		}
+
 		if (Menu::Window.VisualsTab.Watermark.GetState())
 		{
 
@@ -791,9 +808,9 @@ bool __stdcall Hooked_InPrediction()
 		Vector viewPunch = pLocalEntity->localPlayerExclusive()->GetViewPunchAngle();
 		Vector aimPunch = pLocalEntity->localPlayerExclusive()->GetAimPunchAngle();
 
-		m_LocalViewAngles[0] -= (viewPunch[0] + (aimPunch[0] * 2 * 0.4499999f));
-		m_LocalViewAngles[1] -= (viewPunch[1] + (aimPunch[1] * 2 * 0.4499999f));
-		m_LocalViewAngles[2] -= (viewPunch[2] + (aimPunch[2] * 2 * 0.4499999f));
+		m_LocalViewAngles[0] -= (viewPunch[0] + (aimPunch[0] * 2 * 0.5f));
+		m_LocalViewAngles[1] -= (viewPunch[1] + (aimPunch[1] * 2 * 0.5f));
+		m_LocalViewAngles[2] -= (viewPunch[2] + (aimPunch[2] * 2 * 0.5f));
 		return true;
 	}
 
