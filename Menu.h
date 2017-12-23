@@ -82,6 +82,8 @@ public:
 	CCheckBox AimbotKeyPress;
 	CKeyBind  AimbotKeyBind;
 	CCheckBox AimbotSmokeCheck;
+	CCheckBox AimbotBacktrack;
+	CSlider   TickModulation;
 
 	CGroupBox TriggerGroup;
 	CCheckBox TriggerEnable;

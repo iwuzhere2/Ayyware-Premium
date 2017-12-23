@@ -64,9 +64,6 @@
     <Filter Include="Source Files\Menu">
       <UniqueIdentifier>{d8551803-e03b-4a1d-9348-77a3b6d8dce3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Hacks\indigo">
-      <UniqueIdentifier>{d59f6e8e-2640-49fe-86c3-9958dc9c8448}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Hacks\indigo">
       <UniqueIdentifier>{bf0580cc-7508-4b34-8b7c-117883aeb161}</UniqueIdentifier>
     </Filter>
@@ -225,6 +222,15 @@
     <ClInclude Include="aim.h">
       <Filter>Header Files\Hacks\indigo</Filter>
     </ClInclude>
+    <ClInclude Include="sim.h">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="backtracking.h">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="lagcomp2.h">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DLLMain.cpp">
@@ -326,11 +332,11 @@
     <ClCompile Include="LagComp.cpp">
       <Filter>Source Files\Hacks</Filter>
     </ClCompile>
-    <ClCompile Include="Backtrack.cpp">
+    <ClCompile Include="sim.cpp">
       <Filter>Source Files\Hacks</Filter>
     </ClCompile>
-    <ClCompile Include="aim.cpp">
-      <Filter>Source Files\Hacks\indigo</Filter>
+    <ClCompile Include="lagcomp2.cpp">
+      <Filter>Source Files\Hacks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

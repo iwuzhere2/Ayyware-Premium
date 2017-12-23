@@ -31,6 +31,16 @@ public:
 	std::map<int, float>newlbydelta;
 	std::map<int, float>finallbydelta;
 	std::map<int, float>lbydif;
+
+	std::map<int, float>resolvedangle;
+	std::map<int, float>resolvedangle2;
+	std::map<int, float>resolvedangle3;
+	std::map<int, float>resolvedangle4;
+	std::map<int, float>resolvedangle5;
+	std::map<int, float>resolvedangle6;
+	std::map<int, float>resolvedangle7;
+	std::map<int, float>resolvedangle8;
+	
 	float newsimtime;
 	float storedsimtime;
 	bool lbyupdated;

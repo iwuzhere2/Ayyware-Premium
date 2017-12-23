@@ -6,7 +6,14 @@
 #include "UTIL Functions.h"
 #include "nospread.h"
 #include "ESP.h"
+#include "lagcomp2.h"
+
 #define M_PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679f
+
+#define TICK_INTERVAL			( Interfaces::Globals->interval_per_tick )
+#define TIME_TO_TICKS( dt )		( (int)( 0.5f + (float)(dt) / TICK_INTERVAL ) )
+#define TICKS_TO_TIME( t ) ( Interfaces::Globals->interval_per_tick *( t ) )
+
 
 void CRageBot::Init()
 {
@@ -145,42 +152,7 @@ Vector BestPoint(IClientEntity *targetPlayer, Vector &final)
 	return final;
 }
 
-template<class T, class U>
-T clamp(T in, U low, U high)
-{
-	if (in <= low)
-		return low;
 
-	if (in >= high)
-		return high;
-
-	return in;
-}
-
-float LagFix()
-{
-	float updaterate = Interfaces::CVar->FindVar("cl_updaterate")->fValue;
-	ConVar* minupdate = Interfaces::CVar->FindVar("sv_minupdaterate");
-	ConVar* maxupdate = Interfaces::CVar->FindVar("sv_maxupdaterate");
-
-	if (minupdate && maxupdate)
-		updaterate = maxupdate->fValue;
-
-	float ratio = Interfaces::CVar->FindVar("cl_interp_ratio")->fValue;
-
-	if (ratio == 0)
-		ratio = 1.0f;
-
-	float lerp = Interfaces::CVar->FindVar("cl_interp")->fValue;
-	ConVar* cmin = Interfaces::CVar->FindVar("sv_client_min_interp_ratio");
-	ConVar* cmax = Interfaces::CVar->FindVar("sv_client_max_interp_ratio");
-
-	if (cmin && cmax && cmin->fValue != 1)
-		ratio = clamp(ratio, cmin->fValue, cmax->fValue);
-
-
-	return max(lerp, ratio / updaterate);
-}
 
 
 void CRageBot::DoAimbot(CUserCmd *pCmd, bool &bSendPacket)
@@ -303,6 +275,11 @@ void CRageBot::DoAimbot(CUserCmd *pCmd, bool &bSendPacket)
 
 		Vector Point;
 		Vector AimPoint = GetHitboxPosition(pTarget, HitBox) + Vector(0, 0, pointscale);
+		for (int i; i < 64; i++)
+		{
+			backtracking->UpdateRecord(i, pTarget);
+		}
+			
 
 		int tick = pCmd->tick_count;
 
@@ -330,8 +307,8 @@ void CRageBot::DoAimbot(CUserCmd *pCmd, bool &bSendPacket)
 					{
 						pCmd->buttons |= IN_ATTACK;
 
-						if (Menu::Window.RageBotTab.AccuracySpread.GetState())
-							DoNoSpread(pCmd);
+						//if (Menu::Window.RageBotTab.AccuracySpread.GetState())
+							//DoNoSpread(pCmd);
 					}
 					else
 					{
@@ -343,6 +320,8 @@ void CRageBot::DoAimbot(CUserCmd *pCmd, bool &bSendPacket)
 
 		if (IsAbleToShoot(pLocal) && pCmd->buttons & IN_ATTACK)
 			Globals::Shots += 1;
+		if (Menu::Window.RageBotTab.AccuracySpread.GetState())
+			pCmd->tick_count += TICKS_TO_TIME(Interfaces::Globals->interval_per_tick);
 	}
 }
 
@@ -811,7 +790,7 @@ bool CRageBot::AimAtPoint(IClientEntity* pLocal, Vector point, CUserCmd *pCmd, b
 	Vector angles;
 	Vector src = pLocal->GetEyePosition() + pLocal->GetViewOffset();
 	//--Indigo
-	Vector vAimAngle;
+	Vector vAimAngle , backtrackangle;
 	VectorAngles(point - pLocal->GetEyePosition(), vAimAngle);
 
 	//CalcAngle(src, point, angles);  --Avoz
@@ -857,11 +836,81 @@ bool CRageBot::AimAtPoint(IClientEntity* pLocal, Vector point, CUserCmd *pCmd, b
 		Interfaces::Engine->SetViewAngles(vAimAngle);
 	}
 
+	
+
 	return ReturnValue;
+}
+
+bool NextLBYUpdate(bool &bSendPacket)
+{
+	/*
+
+
+	float flServerTime = (float)(LocalPlayer->GetTickBase()  * Interfaces::Globals->interval_per_tick);
+
+
+	if (OldLBY != LocalPlayer->GetLowerBodyYaw())
+	{
+	LBYBreakerTimer++;
+	OldLBY = LocalPlayer->GetLowerBodyYaw();
+	bSwitch = !bSwitch;
+	LastLBYUpdateTime = flServerTime;
+	}
+
+	if (CurrentVelocity(LocalPlayer) > 0.5)
+	{
+	LastLBYUpdateTime = flServerTime;
+	return false;
+	}
+
+	if ((LastLBYUpdateTime + 1 - (GetLatency() * 2) < flServerTime) && (LocalPlayer->GetFlags() & FL_ONGROUND))
+	{
+	if (LastLBYUpdateTime + 1.1 - (GetLatency() * 2) < flServerTime)
+	{
+	LastLBYUpdateTime += 1.1;
+	}
+	return true;
+	}
+	return false;
+	*/
+	IClientEntity* LocalPlayer = hackManager.pLocal();
+	static int TESTERRR;
+	static float oldMemeTime;
+	int LbyBreakertimer;
+	static float nextLBYUpdate;
+	static float OldLBY;
+	static float lastUpdatetimeLBY;
+	float flServerTime = (float)(LocalPlayer->GetTickBase()  * Interfaces::Globals->interval_per_tick);
+	if (LocalPlayer->IsAlive())
+	{
+		if (OldLBY != LocalPlayer->GetLowerBodyYaw())
+			lastUpdatetimeLBY = flServerTime;
+		OldLBY = LocalPlayer->GetLowerBodyYaw();
+		if (flServerTime > nextLBYUpdate && LocalPlayer->GetFlags() & FL_ONGROUND && LocalPlayer->GetVelocity().Length2D() < 0.1f) {
+
+			nextLBYUpdate = flServerTime + 1.1;
+
+			if (abs(nextLBYUpdate - lastUpdatetimeLBY) >= 1.1) {
+
+				LbyBreakertimer++;
+				if (TESTERRR != LbyBreakertimer && abs(oldMemeTime - Interfaces::Globals->curtime) > 0.8 && bSendPacket == false) {
+					oldMemeTime = Interfaces::Globals->curtime;
+					TESTERRR = LbyBreakertimer;
+					return true;
+				}
+				else {
+
+					return false;
+
+				}
+			}
+		}
+	}
 }
 
 namespace AntiAims
 {
+	static float real = 0.f;
 
 	void JitterPitch(CUserCmd *pCmd)
 	{
@@ -895,6 +944,23 @@ namespace AntiAims
 		}
 	}
 
+	void fakeup(CUserCmd *pcmd, bool &bSendPacket)
+	{
+		static int lel = -1;
+		lel++;
+		if (lel < 1)
+		{
+			bSendPacket = false;
+			pcmd->viewangles.x = 45;
+		}
+		else
+		{
+			bSendPacket = true;
+			pcmd->viewangles.x = 90;
+			lel = -1;
+		}
+	}
+
 	void StaticJitter(CUserCmd *pCmd)
 	{
 		static bool down = true;
@@ -922,26 +988,67 @@ namespace AntiAims
 		}
 		else
 		{
-			pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + 45;
+			pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + 135;
 		}
 	}
 
 	void fakeLBYDMG(CUserCmd *pCmd, bool &bSendPacket)
 	{
 		IClientEntity* LocalPlayer = hackManager.pLocal();
-		static float spin = 0.f;
-		spin += 10;
-		pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + spin - 40;
-		if (spin > 360.f)
-			spin = 0.f;
+		static float fspin = 0.f;
+		static int wait = -1;
+		
+		wait++;
+		if (wait == 5)
+		{
+			fspin += 33.30f;
+		}
+
+		pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + fspin;
+
+		if (wait >= 6)
+			wait = -1;
+
+		if (fspin > 360.f)
+			fspin = 0.f;
+		real = fspin;
 	}
 
-	void LBYDMG(CUserCmd *pCmd, bool &bSendPacket, bool NextLBYUpdate())
+	void LBYDMG(CUserCmd *pCmd, bool &bSendPacket)
 	{
 		IClientEntity* LocalPlayer = hackManager.pLocal();
 		static float spin = 0.f;
-		spin += 10;
-		pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() - spin + 40;
+		spin += 12.85714285714286f;
+
+		if (NextLBYUpdate(bSendPacket))
+		{
+			if (pCmd->viewangles.y < 72 && pCmd->viewangles.y >= 0)
+			{
+				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() - 72;
+			}
+
+			if (pCmd->viewangles.y < 144 && pCmd->viewangles.y >= 73)
+			{
+				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + 72;
+			}
+
+			if (pCmd->viewangles.y < -36 && pCmd->viewangles.y <= 0)
+			{
+				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + 144;
+			}
+
+			if (pCmd->viewangles.y < -108 && pCmd->viewangles.y <= -37)
+			{
+				pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() - 216;
+			}
+
+		}
+		else if (spin < (real + 45) || spin >(real - 45))
+			pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() - (spin + 72);
+		else
+			pCmd->viewangles.y = LocalPlayer->GetLowerBodyYaw() + spin;
+			
+
 		if (spin > 360.f)
 			spin = 0.f;
 	}
@@ -1283,12 +1390,12 @@ namespace AntiAims
 		if (flip)
 		{
 			bSendPacket = false;
-			pCmd->viewangles.x = 89.95f;
+			pCmd->viewangles.x = -15.95f;
 		}
 		else
 		{
 			bSendPacket = true;
-			pCmd->viewangles.x = -89.95f;
+			pCmd->viewangles.x = 90.95f;
 		}
 		flip = !flip;
 	}
@@ -1623,50 +1730,20 @@ float CurrentVelocity(IClientEntity* LocalPlayer)
 	int vel = LocalPlayer->GetVelocity().Length2D();
 	return vel;
 }
-bool NextLBYUpdate()
-{
-	IClientEntity* LocalPlayer = hackManager.pLocal();
 
-	float flServerTime = (float)(LocalPlayer->GetTickBase()  * Interfaces::Globals->interval_per_tick);
-
-
-	if (OldLBY != LocalPlayer->GetLowerBodyYaw())
-	{
-		LBYBreakerTimer++;
-		OldLBY = LocalPlayer->GetLowerBodyYaw();
-		bSwitch = !bSwitch;
-		LastLBYUpdateTime = flServerTime;
-	}
-
-	if (CurrentVelocity(LocalPlayer) > 0.5)
-	{
-		LastLBYUpdateTime = flServerTime;
-		return false;
-	}
-
-	if ((LastLBYUpdateTime + 1 - (GetLatency() * 2) < flServerTime) && (LocalPlayer->GetFlags() & FL_ONGROUND))
-	{
-		if (LastLBYUpdateTime + 1.1 - (GetLatency() * 2) < flServerTime)
-		{
-			LastLBYUpdateTime += 1.1;
-		}
-		return true;
-	}
-	return false;
-}
 
 void DoLBYBreak(CUserCmd * pCmd, IClientEntity* pLocal, bool& bSendPacket)
 {
 	if (!bSendPacket)
 	{
-		if (NextLBYUpdate())
+		if (NextLBYUpdate(bSendPacket))
 			pCmd->viewangles.y += 90;
 		else
 			pCmd->viewangles.y -= 90;
 	}
 	else
 	{
-		if (NextLBYUpdate())
+		if (NextLBYUpdate(bSendPacket))
 			pCmd->viewangles.y -= 90;
 		else
 			pCmd->viewangles.y += 90;
@@ -1677,14 +1754,14 @@ void DoLBYBreakReal(CUserCmd * pCmd, IClientEntity* pLocal, bool& bSendPacket)
 {
 	if (!bSendPacket)
 	{
-		if (NextLBYUpdate())
+		if (NextLBYUpdate(bSendPacket))
 			pCmd->viewangles.y -= 90;
 		else
 			pCmd->viewangles.y += 90;
 	}
 	else
 	{
-		if (NextLBYUpdate())
+		if (NextLBYUpdate(bSendPacket))
 			pCmd->viewangles.y += 90;
 		else
 			pCmd->viewangles.y -= 90;
@@ -1757,7 +1834,7 @@ void DoRealAA(CUserCmd* pCmd, IClientEntity* pLocal, bool& bSendPacket)
 		DoLBYBreakReal(pCmd, pLocal, bSendPacket);
 		break;
 	case 15:
-		AntiAims::LBYDMG(pCmd, bSendPacket, NextLBYUpdate);
+		AntiAims::LBYDMG(pCmd, bSendPacket);
 		break;
 	case 16:
 		AntiAims::killLBY(pCmd, bSendPacket);
@@ -1849,7 +1926,6 @@ void DoFakeAA(CUserCmd* pCmd, bool& bSendPacket, IClientEntity* pLocal)
 	RandomFake = !RandomFake;
 }
 
-
 void CRageBot::DoAntiAim(CUserCmd *pCmd, bool &bSendPacket)
 {
 	IClientEntity* pLocal = hackManager.pLocal();
@@ -1887,13 +1963,13 @@ void CRageBot::DoAntiAim(CUserCmd *pCmd, bool &bSendPacket)
 	case 0:
 		break;
 	case 1:
-		pCmd->viewangles.x = 45.f;
+		pCmd->viewangles.x = 90.f;
 		break;
 	case 2:
 		AntiAims::JitterPitch(pCmd);
 		break;
 	case 3:
-		pCmd->viewangles.x = 89.000000;
+		pCmd->viewangles.x = 90.000000;
 		break;
 	case 4:
 		AntiAims::Up(pCmd);
@@ -1902,13 +1978,17 @@ void CRageBot::DoAntiAim(CUserCmd *pCmd, bool &bSendPacket)
 		AntiAims::Zero(pCmd, bSendPacket);
 		break;
 	case 6:
+		AntiAims::fakeup(pCmd, bSendPacket);
+	case 7:
 		static auto Random = false;
 		if (Random)
 			pCmd->viewangles.x += Menu::Window.RageBotTab.CustomPitch.GetValue();
 		else
 			pCmd->viewangles.x -= Menu::Window.RageBotTab.CustomPitch.GetValue();
 		Random = !Random;
-
+		break;
+	//case 7:
+		//AntiAims::fakeup(pCmd, bSendPacket);
 	}
 
 	if (Menu::Window.RageBotTab.LBY.GetState() && pLocal->GetVelocity().Length2D() == 0)

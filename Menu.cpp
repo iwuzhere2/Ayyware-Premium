@@ -207,15 +207,15 @@ void CRageBotTab::Setup()
 	TargetGroup.PlaceLabledControl("PVS Fix", this, &PVSFix);
 
 	EnginePrediction.SetFileId("tgt_enginepred");
-	TargetGroup.PlaceLabledControl("Engine Prediction", this, &EnginePrediction);
+	TargetGroup.PlaceLabledControl("Engine Prediction (+ lagfix)", this, &EnginePrediction);
 
 	TargetMultipoint.SetFileId("tgt_multipoint");
 	TargetGroup.PlaceLabledControl("Multipoint", this, &TargetMultipoint);
 
 	TargetPointscale.SetFileId("tgt_pointscale");
-	TargetPointscale.SetBoundaries(0.f, 10.f);
+	TargetPointscale.SetBoundaries(-5.f, 15.f);
 	TargetPointscale.SetValue(5.f);
-	TargetGroup.PlaceLabledControl("Aim Height", this, &TargetPointscale);
+	TargetGroup.PlaceLabledControl("PointScale", this, &TargetPointscale);
 #pragma endregion Targetting controls 
 
 #pragma region Accuracy
@@ -228,7 +228,7 @@ void CRageBotTab::Setup()
 	AccuracyGroup.PlaceLabledControl("Remove Recoil", this, &AccuracyRecoil);
 
 	AccuracySpread.SetFileId("acc_nospread");
-	AccuracyGroup.PlaceLabledControl("Backtracking", this, &AccuracySpread);
+	AccuracyGroup.PlaceLabledControl("Backtrack (semi fake news)", this, &AccuracySpread);
 
 	AccuracyAutoWall.SetFileId("acc_awall");
 	AccuracyGroup.PlaceLabledControl("Auto Wall", this, &AccuracyAutoWall);
@@ -245,11 +245,11 @@ void CRageBotTab::Setup()
 	AccuracyGroup.PlaceLabledControl("LBY Correction", this, &LowerbodyFix);
 
 	AdvancedResolver.SetFileId("acc_advancedresolver");
-	AccuracyGroup.PlaceLabledControl("Pitch Correction <- wont work", this, &AdvancedResolver);
+	AccuracyGroup.PlaceLabledControl("Pitch Resolver (Fake News)", this, &AdvancedResolver);
 
 	AimbotResolver.SetFileId("acc_aaa");
 	AimbotResolver.AddItem("Off");
-	AimbotResolver.AddItem("40° +- antijitter");
+	AimbotResolver.AddItem("autoresolver");
 	AimbotResolver.AddItem("oldlbydelta");
 	AimbotResolver.AddItem("anti-fakehead");
 	AimbotResolver.AddItem("brute");
@@ -286,6 +286,7 @@ void CRageBotTab::Setup()
 	AntiAimPitch.AddItem("Emotion");
 	AntiAimPitch.AddItem("Up");
 	AntiAimPitch.AddItem("Zero");
+	AntiAimPitch.AddItem("fake half up");
 	AntiAimPitch.AddItem("Custom");
 	AntiAimGroup.PlaceLabledControl("Pitch", this, &AntiAimPitch);
 
@@ -390,6 +391,14 @@ void CLegitBotTab::Setup()
 
 	AimbotSmokeCheck.SetFileId("otr_smokecheck");
 	AimbotGroup.PlaceLabledControl("Smoke Check", this, &AimbotSmokeCheck);
+
+	AimbotBacktrack.SetFileId("aim_backlegit");
+	AimbotGroup.PlaceLabledControl("Backtracking", this, &AimbotBacktrack);
+
+	TickModulation.SetFileId("tick_modulate");
+	TickModulation.SetBoundaries(0.1f, 16.f);
+	TickModulation.SetValue(14.f);
+	AimbotGroup.PlaceLabledControl("Tick Modulation", this, &TickModulation);
 
 	AimbotKeyPress.SetFileId("aim_usekey");
 	AimbotGroup.PlaceLabledControl("On Key", this, &AimbotKeyPress);
@@ -971,13 +980,13 @@ void CMiscTab::Setup()
 	FakeLagGroup.PlaceLabledControl("Enable", this, &FakeLagEnable);
 
 	FakeLagChoke.SetFileId("fakelag_choke");
-	FakeLagChoke.SetBoundaries(0, 18);
+	FakeLagChoke.SetBoundaries(0, 21);
 	FakeLagChoke.SetValue(0);
 	FakeLagGroup.PlaceLabledControl("Choke Factor", this, &FakeLagChoke);
 
 	FakeLagTyp.SetFileId("fakelag_typ");
 	FakeLagTyp.AddItem("Off");
-	FakeLagTyp.AddItem("Normal");
+	FakeLagTyp.AddItem("lag comp braking > 18");
 	FakeLagTyp.AddItem("Adaptive");
 	FakeLagTyp.AddItem("Normal - In Air");
 	FakeLagTyp.AddItem("Adaptive - In Air");

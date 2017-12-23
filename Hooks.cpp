@@ -10,6 +10,7 @@
 #include "Resolver.h"
 #include "hitmarker.h"
 #include "LagComp.h"
+#include "LagComp2.h"
 #include "UTIL Functions.h"
 #include <intrin.h>
 #include "EngineClient.h"
@@ -19,6 +20,10 @@ char fake[50];
 char real[50];
 float ffake;
 float freal; 
+char fakex[50];
+char realx[50];
+float ffakex;
+float frealx;
 
 #define TICK_INTERVAL			( Interfaces::Globals->interval_per_tick )
 #define TIME_TO_TICKS( dt )		( (int)( 0.5f + (float)(dt) / TICK_INTERVAL ) )
@@ -46,7 +51,7 @@ bool Globals::change;
 int Globals::TargetID;
 std::map<int, QAngle>Globals::storedshit;
 
-LagCompensation *lagComp = nullptr;
+//LagCompensation *lagComp = nullptr;
 
 int Globals::missedshots;
 
@@ -142,7 +147,7 @@ float clip(float n, float lower, float upper)
 	return (std::max)(lower, (std::min)(n, upper));
 }
 
-const char* clantaganimation[18] =
+const char* clantaganimation[22] =
 {
 		"          ",
 		"         s",
@@ -153,6 +158,10 @@ const char* clantaganimation[18] =
 		"    skoot.",
 		"   skoot.c",
 		" skoot.cc",
+		" skoot.cc",
+		" skoot.cc",
+		"skoot.cc ",
+		"skoot.cc ",
 		"skoot.cc ",
 		"koot.cc  ",
 		"oot.cc   ",
@@ -175,8 +184,8 @@ int LagCompBreak() {
 	if (speed > 0.f) {
 		auto distance_per_tick = speed *
 			Interfaces::Globals->interval_per_tick;
-		int choked_ticks = std::ceilf(65.f / distance_per_tick);
-		return std::min<int>(choked_ticks, 14);
+		int choked_ticks = std::ceilf(96.f / distance_per_tick);
+		return std::min<int>(choked_ticks, 15);
 	}
 	return 1;
 }
@@ -268,6 +277,14 @@ bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 		//int tick = pCmd->tick_count;
 		IClientEntity* pEntity;
 		IClientEntity *pLocal = Interfaces::EntList->GetClientEntity(Interfaces::Engine->GetLocalPlayer());
+
+		for (int i = 1; i < Interfaces::Engine->GetMaxClients(); i++) {
+			IClientEntity* pBaseEntity = Interfaces::EntList->GetClientEntity(i);
+			if (pBaseEntity && !pBaseEntity->IsDormant() && pBaseEntity != hackManager.pLocal()) globalsh.OldSimulationTime[i] = pBaseEntity->GetSimulationTime();
+			if (pBaseEntity && !pBaseEntity->IsDormant() && pBaseEntity != hackManager.pLocal() && Menu::Window.RageBotTab.AccuracySpread.GetState())
+				DataManager.UpdatePlayerPos();
+		}
+
 		if (Interfaces::Engine->IsConnected() && Interfaces::Engine->IsInGame() && pLocal && pLocal->IsAlive())
 		{
 
@@ -296,6 +313,8 @@ bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 				op4--;
 				*/
 			Hacks::MoveHacks(pCmd, bSendPacket);
+			backtracking->legitBackTrack(pCmd, pLocal);
+			//backtracking->RunLBYBackTrack(2, pCmd, aimpoint);
 			ResolverSetup::GetInst().CM(pEntity);
 		}
 
@@ -416,7 +435,7 @@ bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 					{
 						autism = autism + 1;
 
-						if (autism >= 18) // number of clantaganimation
+						if (autism >= 22) // number of clantaganimation
 							autism = 0;
 
 						char random[255];
@@ -530,18 +549,18 @@ bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 		if (Menu::Window.MiscTab.OtherSafeMode.GetState())
 		{
 			GameUtils::NormaliseViewAngle(pCmd->viewangles);
-
+			/*
 			if (pCmd->viewangles.z != 0.0f)
 			{
 				pCmd->viewangles.z = 0.00;
 			}
-
-			if (pCmd->viewangles.x < -90 || pCmd->viewangles.x > 90 || pCmd->viewangles.y < -180 || pCmd->viewangles.y > 180)
+			*/
+			if (pCmd->viewangles.x < -89.95f || pCmd->viewangles.x > 89.95f || pCmd->viewangles.y < -180 || pCmd->viewangles.y > 180)
 			{
 				Utilities::Log("Having to re-normalise!");
 				GameUtils::NormaliseViewAngle(pCmd->viewangles);
 				Beep(750, 800); 
-				if (pCmd->viewangles.x < -90 || pCmd->viewangles.x > 90 || pCmd->viewangles.y < -180 || pCmd->viewangles.y > 180)
+				if (pCmd->viewangles.x < -89.95f || pCmd->viewangles.x > 89.95f || pCmd->viewangles.y < -180 || pCmd->viewangles.y > 180)
 				{
 					pCmd->viewangles = origView;
 					pCmd->sidemove = right;
@@ -565,12 +584,16 @@ bool __stdcall CreateMoveClient_Hooked( float frametime, CUserCmd* pCmd)
 			if (bSendPacket)
 			{
 				sprintf(fake, "%f", pCmd->viewangles.y);
+				sprintf(fakex, "%f", pCmd->viewangles.x);
 				ffake = pCmd->viewangles.y;
+				ffakex = pCmd->viewangles.x;
 			}
 			else
 			{
 				sprintf(real, "%f", pCmd->viewangles.y);
+				sprintf(realx, "%f", pCmd->viewangles.x);
 				freal = pCmd->viewangles.y;
+				frealx = pCmd->viewangles.x;
 			}
 		}
 	}
@@ -605,8 +628,8 @@ void FakeLag(CUserCmd* pCmd)
 	IClientEntity* pLocal = hackManager.pLocal();
 
 	int choke = Menu::Window.MiscTab.FakeLagChoke.GetValue() + 1;
-	if (choke > 15)
-		choke = 14;
+	//if (choke > 15)
+		//choke = 14;
 
 	if (Menu::Window.MiscTab.FakeLagEnable.GetState())
 	{
@@ -1236,6 +1259,44 @@ void __fastcall Hooked_DrawModelExecute(void* thisptr, int edx, void* ctx, void*
 }
 
 BYTE bMoveData[0x200];
+
+template<class T, class U>
+T clamp(T in, U low, U high)
+{
+	if (in <= low)
+		return low;
+
+	if (in >= high)
+		return high;
+
+	return in;
+}
+
+float LagFix()
+{
+	float updaterate = Interfaces::CVar->FindVar("cl_updaterate")->fValue;
+	ConVar* minupdate = Interfaces::CVar->FindVar("sv_minupdaterate");
+	ConVar* maxupdate = Interfaces::CVar->FindVar("sv_maxupdaterate");
+
+	if (minupdate && maxupdate)
+		updaterate = maxupdate->fValue;
+
+	float ratio = Interfaces::CVar->FindVar("cl_interp_ratio")->fValue;
+
+	if (ratio == 0)
+		ratio = 1.0f;
+
+	float lerp = Interfaces::CVar->FindVar("cl_interp")->fValue;
+	ConVar* cmin = Interfaces::CVar->FindVar("sv_client_min_interp_ratio");
+	ConVar* cmax = Interfaces::CVar->FindVar("sv_client_max_interp_ratio");
+
+	if (cmin && cmax && cmin->fValue != 1)
+		ratio = clamp(ratio, cmin->fValue, cmax->fValue);
+
+
+	return max(lerp, ratio / updaterate);
+}
+
 void Prediction(CUserCmd* pCmd, IClientEntity* LocalPlayer)
 {
 	if (Interfaces::MoveHelper && Menu::Window.RageBotTab.EnginePrediction.GetState() && LocalPlayer->IsAlive())

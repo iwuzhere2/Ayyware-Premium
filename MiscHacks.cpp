@@ -208,26 +208,13 @@ void CMiscHacks::FakeWalk(CUserCmd* pCmd, bool &bSendPacket)
 void CMiscHacks::SlowMo(CUserCmd *pCmd, bool &bSendPacket)
 {
 	int SlowMotionKey = Menu::Window.MiscTab.OtherSlowMotion.GetKey();
-	Vector src3, dst3, src, dst, f;
-	trace_t tf;
-	Ray_t ray;
-	CTraceFilter filter;
+
 	IClientEntity* plocal = hackManager.pLocal();
 
 	if (SlowMotionKey > 0 && GUI.GetKeyState(SlowMotionKey))
 	{
-		filter.pSkip = hackManager.pLocal();
-		src3 = hackManager.pLocal()->GetEyePosition();
-		AngleVectors(QAngle(90, 0, 0), &f);
-		dst3 = src3 + (f * 65.f);
-		ray.Init(src3, dst3);
-		Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tf);
-
-		float gdist = ((tf.endpos - plocal->GetEyePosition()).Length());
-		if (gdist < 64)
-			bSendPacket = false;
-		else
-			bSendPacket = true;
+		if (plocal->GetFlags() & FL_ONGROUND)
+			pCmd->buttons |= IN_DUCK;
 	}
 }
 
@@ -439,44 +426,39 @@ void CMiscHacks::NameSteal()
 
 		if (dstf < 440)
 		{
-			new_forwardmove = new_forwardmove + (dstf - 440);
-			new_sidemove = new_sidemove + (dstf - 440);
+			new_forwardmove -= (20 * Menu::Window.MiscTab.OtherCircleSlider.GetValue());
 		}
 		if (dstr < 440)
 		{
-			new_forwardmove = new_forwardmove + (dstr - 440);
-			new_sidemove = new_sidemove - (dstr - 440);
+			new_sidemove -= (20 * Menu::Window.MiscTab.OtherCircleSlider.GetValue());
 		}
 		if (dstl < 440)
 		{
-			new_forwardmove = new_forwardmove + (dstl - 440);
-			new_sidemove = new_sidemove + (dstl - 440);
+			new_sidemove += (20 * Menu::Window.MiscTab.OtherCircleSlider.GetValue());
 		}
 		if (dstb < 440)
 		{
-			new_forwardmove = new_forwardmove + (dstb - 440);
-			new_sidemove = new_sidemove + (dstb - 440);
+			new_forwardmove += (20 * Menu::Window.MiscTab.OtherCircleSlider.GetValue());
 		}
-		
 		if (dstdf < 440) 
 		{
-			new_forwardmove = new_forwardmove + (dstdf - 440);
-			new_sidemove = new_sidemove + (dstdf - 440);
+			new_forwardmove -= (20 * Menu::Window.MiscTab.OtherCircleSlider.GetValue());
+			new_sidemove += (20 * Menu::Window.MiscTab.OtherCircleSlider.GetValue());
 		}
 		if (dstdr < 440)
 		{
-			new_forwardmove = new_forwardmove + (dstdr - 440);
-			new_sidemove = new_sidemove - (dstdr - 440);
+			new_forwardmove -= (20 * Menu::Window.MiscTab.OtherCircleSlider.GetValue());
+			new_sidemove += (20 * Menu::Window.MiscTab.OtherCircleSlider.GetValue());
 		}
 		if (dstdl < 440)
 		{
-			new_forwardmove = new_forwardmove + (dstdl - 440);
-			new_sidemove = new_sidemove + (dstdl - 440);
+			new_forwardmove += (20 * Menu::Window.MiscTab.OtherCircleSlider.GetValue());
+			new_sidemove -= (20 * Menu::Window.MiscTab.OtherCircleSlider.GetValue());
 		}
 		if (dstdb < 440)
 		{
-			new_forwardmove = new_forwardmove + (dstdb - 440);
-			new_sidemove = new_sidemove + (dstdb - 440);
+			new_forwardmove += (20 * Menu::Window.MiscTab.OtherCircleSlider.GetValue());
+			new_sidemove -= (20 * Menu::Window.MiscTab.OtherCircleSlider.GetValue());
 		}
 		
 		pCmd->forwardmove = new_forwardmove;
@@ -501,7 +483,7 @@ void CMiscHacks::NameSteal()
 		CircleFactor++;
 		if (CircleFactor > 360)
 			CircleFactor = 0;
-		GetItDoubled = 2.0 * CircleFactor - Interfaces::Globals->interval_per_tick;
+		GetItDoubled = Menu::Window.MiscTab.OtherCircleSlider.GetValue() * CircleFactor - Interfaces::Globals->interval_per_tick;
 
 		Vector StoredViewAngles = pCmd->viewangles;
 

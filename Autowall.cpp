@@ -28,21 +28,21 @@ float GetHitgroupDamageMult(int iHitGroup)
 	switch (iHitGroup)
 	{
 	case HITGROUP_GENERIC:
-		return 0.5f;
+		return 1.f;
 	case HITGROUP_HEAD:
 		return 4.0f;
 	case HITGROUP_CHEST:
 		return 1.f;
 	case HITGROUP_STOMACH:
-		return 0.75f;
+		return 1.f;
 	case HITGROUP_LEFTARM:
-		return 0.5f;
+		return 1.f;
 	case HITGROUP_RIGHTARM:
-		return 0.5f;
+		return 1.f;
 	case HITGROUP_LEFTLEG:
-		return 0.375f;
+		return 0.75f;
 	case HITGROUP_RIGHTLEG:
-		return 0.375f;
+		return 0.75f;
 	case HITGROUP_GEAR:
 		return 0.5f;
 	default:
@@ -73,7 +73,7 @@ void ScaleDamage(int hitgroup, IClientEntity *enemy, float weapon_armor_ratio, f
 
 bool SimulateFireBullet(IClientEntity *local, CBaseCombatWeapon *weapon, FireBulletData &data)
 {
-	data.penetrate_count = 4; // Max Amount Of Penitration
+	data.penetrate_count = 5; // Max Amount Of Penitration
 	data.trace_length = 0.0f; // wow what a meme
 	auto *wpn_data = weapon->GetCSWpnData(); // Get Weapon Info
 	data.current_damage = (float)wpn_data->m_iDamage;// Set Damage Memes

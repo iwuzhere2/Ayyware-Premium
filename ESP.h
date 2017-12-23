@@ -65,6 +65,8 @@ private:
 
 	float DistanceTo(Vector vecSrc, Vector vecDst);
 
+	void BacktrackingCross(IClientEntity * pEntity);
+
 	
 
 	void DrawChicken(IClientEntity* pEntity, ClientClass* cClass);

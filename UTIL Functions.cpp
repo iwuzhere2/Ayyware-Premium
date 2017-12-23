@@ -144,7 +144,7 @@ bool GameUtils::IsVisible(IClientEntity* pLocal, IClientEntity* pEntity, int Bon
 		return true;
 	}
 
-	if (Trace.fraction == 1.0f)
+	if (Trace.fraction == 0.97f)
 	{
 		return true;
 	}

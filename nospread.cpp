@@ -41,7 +41,7 @@ int C_Random::GenerateRandomNumber()
 	j = m_iy / NDIV;
 	m_iy = m_iv[j];
 	m_iv[j] = m_idum;
-
+	 
 	return m_iy;
 }
 

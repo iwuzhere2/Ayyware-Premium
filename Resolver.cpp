@@ -74,7 +74,14 @@ bool IsFakeWalking(IClientEntity* pEntity) {
 }
 
 // Resolver ---------------------------------
-
+static float lby1 = 0.0f;
+static float lby2 = 0.0f;
+static float lby3 = 0.0f;
+static float lby4 = 0.0f;
+static float lby5 = 0.0f;
+static float lby6 = 0.0f;
+static float lby7 = 0.0f;
+static float lby8 = 0.0f;
 
 
 void ResolverSetup::Resolve(IClientEntity* pEntity)
@@ -93,7 +100,14 @@ void ResolverSetup::Resolve(IClientEntity* pEntity)
 		IsMoving = false;
 
 	
-
+	ResolverSetup::resolvedangle[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle2[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle3[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle4[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle5[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle6[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle7[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle8[pEntity->GetIndex()];
 	ResolverSetup::NewANgles[pEntity->GetIndex()] = *pEntity->GetEyeAnglesXY();
 	ResolverSetup::newlby[pEntity->GetIndex()] = pEntity->GetLowerBodyYaw();
 	ResolverSetup::newsimtime = pEntity->GetSimulationTime();
@@ -102,6 +116,7 @@ void ResolverSetup::Resolve(IClientEntity* pEntity)
 	ResolverSetup::finaldelta[pEntity->GetIndex()] = ResolverSetup::newdelta[pEntity->GetIndex()] - ResolverSetup::storeddelta[pEntity->GetIndex()];
 	ResolverSetup::finallbydelta[pEntity->GetIndex()] = ResolverSetup::newlbydelta[pEntity->GetIndex()] - ResolverSetup::storedlbydelta[pEntity->GetIndex()];
 	ResolverSetup::lbydif[pEntity->GetIndex()] = ResolverSetup::newlby[pEntity->GetIndex()] - ResolverSetup::storedlby[pEntity->GetIndex()];
+	
 	if (newlby == storedlby)
 		ResolverSetup::lbyupdated = false;
 	else
@@ -110,34 +125,108 @@ void ResolverSetup::Resolve(IClientEntity* pEntity)
 
 	if (Menu::Window.RageBotTab.AimbotResolver.GetIndex() == 0)
 	{
-
+		pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw();
 	}
 	else if (Menu::Window.RageBotTab.AimbotResolver.GetIndex() == 1)//level 1
 	{
-		if (i == 0 || lbyupdated)
+		if (lbyupdated)
 		{
+			if (lby1 == 0.0f)
+				lby1 = newlby[pEntity->GetIndex()];
+			if (lby1 != 0.0f && lby2 == 0.0f)
+				lby2 = newlby[pEntity->GetIndex()] + 90;
+			if (lby2 != 0.0f && lby3 == 0.0f)
+				lby3 = newlby[pEntity->GetIndex()] - 180;
+			if (lby3 != 0.0f && lby4 == 0.0f)
+				lby4 = newlby[pEntity->GetIndex()] - 90;
+			if (lby4 != 0.0f && lby5 == 0.0f)
+				lby5 = newlby[pEntity->GetIndex()] + 45;
+			if (lby5 != 0.0f && lby6 == 0.0f)
+				lby6 = newlby[pEntity->GetIndex()] - 90;
+			if (lby6 != 0.0f && lby7 == 0.0f)
+				lby7 = newlby[pEntity->GetIndex()] + 180;
+			if (lby7 != 0.0f && lby8 == 0.0f)
+				lby8 = newlby[pEntity->GetIndex()] - 90;
+
 			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw();
-			i++;
 		}
-		if (i == 1 && !lbyupdated)
+			switch ((Globals::Shots) % 8)
+			{
+			case 0:	
+				if (resolvedangle[pEntity->GetIndex()] = 0.0f)
+					pEntity->GetEyeAnglesXY()->y = lby1;
+				else
+					pEntity->GetEyeAnglesXY()->y = resolvedangle[pEntity->GetIndex()];
+				if (didhitHS)
+					resolvedangle[pEntity->GetIndex()] = lby1;
+				break;
+			case 1:
+				if (resolvedangle2[pEntity->GetIndex()] = 0.0f)
+					pEntity->GetEyeAnglesXY()->y = lby2;
+				else
+					pEntity->GetEyeAnglesXY()->y = resolvedangle2[pEntity->GetIndex()];
+				if (didhitHS)
+					resolvedangle2[pEntity->GetIndex()] = lby2;
+				break;
+			case 2:
+				if (resolvedangle3[pEntity->GetIndex()] = 0.0f)
+					pEntity->GetEyeAnglesXY()->y = lby3;
+				else
+					pEntity->GetEyeAnglesXY()->y = resolvedangle3[pEntity->GetIndex()];
+				if (didhitHS)
+					resolvedangle3[pEntity->GetIndex()] = lby3;
+				break;
+			case 3:
+				if (resolvedangle4[pEntity->GetIndex()] = 0.0f)
+					pEntity->GetEyeAnglesXY()->y = lby4;
+				else
+					pEntity->GetEyeAnglesXY()->y = resolvedangle4[pEntity->GetIndex()];
+				if (didhitHS)
+					resolvedangle4[pEntity->GetIndex()] = lby4;
+				break;
+			case 4:
+				if (resolvedangle5[pEntity->GetIndex()] = 0.0f)
+					pEntity->GetEyeAnglesXY()->y = lby5;
+				else
+					pEntity->GetEyeAnglesXY()->y = resolvedangle5[pEntity->GetIndex()];
+				if (didhitHS)
+					resolvedangle5[pEntity->GetIndex()] = lby5;
+				break;
+			case 5:
+				if (resolvedangle6[pEntity->GetIndex()] = 0.0f)
+					pEntity->GetEyeAnglesXY()->y = lby6;
+				else
+					pEntity->GetEyeAnglesXY()->y = resolvedangle6[pEntity->GetIndex()];
+				if (didhitHS)
+					resolvedangle6[pEntity->GetIndex()] = lby6;
+				break;
+			case 6:
+				if (resolvedangle7[pEntity->GetIndex()] = 0.0f)
+					pEntity->GetEyeAnglesXY()->y = lby7;
+				else
+					pEntity->GetEyeAnglesXY()->y = resolvedangle7[pEntity->GetIndex()];
+				if (didhitHS)
+					resolvedangle7[pEntity->GetIndex()] = lby7;
+				break;
+			case 7:
+				if (resolvedangle8[pEntity->GetIndex()] = 0.0f)
+					pEntity->GetEyeAnglesXY()->y = lby8;
+				else
+					pEntity->GetEyeAnglesXY()->y = resolvedangle8[pEntity->GetIndex()];
+				if (didhitHS)
+					resolvedangle8[pEntity->GetIndex()] = lby8;
+				break;
+			}
+		if (lby8 != 0.0f)
 		{
-			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 35.f;
-			i++;
-		}
-		if (i == 2 && !lbyupdated)
-		{
-			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 105.f;
-			i++;
-		}
-		if (i == 3)
-		{
-			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 140.f;
-			i++;
-		}
-		if (i == 4)
-		{
-			pEntity->GetEyeAnglesXY()->y = pEntity->GetLowerBodyYaw() + 210.f;
-			i = 0;
+			lby1 = 0.0f;
+				lby2 = 0.0f;
+				lby3 = 0.0f;
+				lby4 = 0.0f;
+				lby5 = 0.0f;
+				lby6 = 0.0f;
+				lby7 = 0.0f;
+				lby8 = 0.0f;
 		}
 	}
 	else if (Menu::Window.RageBotTab.AimbotResolver.GetIndex() == 2) //level 2 
@@ -223,6 +312,14 @@ void ResolverSetup::StoreThings(IClientEntity* pEntity)
 	ResolverSetup::storedsimtime = pEntity->GetSimulationTime();
 	ResolverSetup::storeddelta[pEntity->GetIndex()] = pEntity->GetEyeAnglesXY()->y;
 	ResolverSetup::storedlby[pEntity->GetIndex()] = pEntity->GetLowerBodyYaw();
+	ResolverSetup::resolvedangle[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle2[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle3[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle4[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle5[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle6[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle7[pEntity->GetIndex()];
+	ResolverSetup::resolvedangle8[pEntity->GetIndex()];
 }
 
 void ResolverSetup::CM(IClientEntity* pEntity)

@@ -129,6 +129,7 @@
     <ClInclude Include="AntiAntiAim.h" />
     <ClInclude Include="AntiLeak.h" />
     <ClInclude Include="Autowall.h" />
+    <ClInclude Include="backtracking.h" />
     <ClInclude Include="BaseClient.h" />
     <ClInclude Include="bspflags.h" />
     <ClInclude Include="Chams.h" />
@@ -147,9 +148,11 @@
     <ClInclude Include="Hacks.h" />
     <ClInclude Include="hitmarker.h" />
     <ClInclude Include="LagComp.h" />
+    <ClInclude Include="lagcomp2.h" />
     <ClInclude Include="nospread.h" />
     <ClInclude Include="Proxies.h" />
     <ClInclude Include="Resolver.h" />
+    <ClInclude Include="sim.h" />
     <ClInclude Include="Skins.h" />
     <ClInclude Include="winwindef.h" />
     <ClInclude Include="Hooks.h" />
@@ -178,10 +181,8 @@
     <ClInclude Include="Visuals.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="aim.cpp" />
     <ClCompile Include="AntiAntiAim.cpp" />
     <ClCompile Include="Autowall.cpp" />
-    <ClCompile Include="Backtrack.cpp" />
     <ClCompile Include="Chams.cpp" />
     <ClCompile Include="checksum_md5.cpp" />
     <ClCompile Include="Controls.cpp" />
@@ -195,6 +196,7 @@
     <ClCompile Include="INJ\ReflectiveLoader.cpp" />
     <ClCompile Include="Interfaces.cpp" />
     <ClCompile Include="LagComp.cpp" />
+    <ClCompile Include="lagcomp2.cpp" />
     <ClCompile Include="LegitBot.cpp" />
     <ClCompile Include="MathFunctions.cpp" />
     <ClCompile Include="Menu.cpp" />
@@ -207,6 +209,7 @@
     <ClCompile Include="RageBot.cpp" />
     <ClCompile Include="RenderManager.cpp" />
     <ClCompile Include="Resolver.cpp" />
+    <ClCompile Include="sim.cpp" />
     <ClCompile Include="SpoofedConvar.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="UTIL Functions.cpp" />

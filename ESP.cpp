@@ -4,6 +4,7 @@
 #include "GlowManager.h"
 #include "Chams.h"
 #include "Hooks.h"
+#include "lagcomp2.h"
 
 extern float rffmove;
 extern float rfsmove;
@@ -15,6 +16,10 @@ extern char fake;
 extern char real;
 extern float ffake;
 extern float freal;
+extern char fakex;
+extern char realx;
+extern float ffakex;
+extern float frealx;
 
 DWORD GlowManager = *(DWORD*)(Utilities::Memory::FindPatternV2("client.dll", "0F 11 05 ?? ?? ?? ?? 83 C8 01 C7 05 ?? ?? ?? ?? 00 00 00 00") + 3);
 
@@ -64,9 +69,9 @@ void CEsp::Draw()
 		bool* pbSendPacket = (bool*)(*(DWORD*)pebp - 0x1C);
 		bool& bSendPacket = *pbSendPacket;
 
-		if (pEntity && pEntity == pLocal && pEntity->IsDormant())
+		if (pLocal && pLocal->IsAlive())
 		{
-			if (Menu::Window.VisualsTab.FiltersPlayers.GetState() && Interfaces::Engine->GetPlayerInfo(i, &pinfo) && pEntity->IsAlive())
+			if (Menu::Window.VisualsTab.Filtersown.GetState() && Interfaces::Engine->GetPlayerInfo(i, &pinfo) && pEntity->IsAlive())
 			{
 				DrawPlayer(pEntity, pinfo, &bSendPacket, pCmd);
 			}
@@ -144,8 +149,11 @@ void CEsp::Draw()
 
 	if (Menu::Window.VisualsTab.GrenadeTrace.GetState())
 	{
-		DrawTrace();
 		GrenadeTrace();	
+	}
+	if (Menu::Window.VisualsTab.BulletTrace.GetState())
+	{
+		DrawTrace();
 	}
 }
 
@@ -213,7 +221,11 @@ void CEsp::DrawPlayer(IClientEntity* pEntity, player_info_t pinfo , bool bSendPa
 			DrawCross(pEntity);
 
 		if (Menu::Window.VisualsTab.OptionsSkeleton.GetState())
+		{
 			DrawSkeleton(pEntity);
+			BacktrackingCross(pEntity);
+		}
+			
 
 		if (Menu::Window.VisualsTab.Money.GetState())
 			DrawMoney(pEntity, Box);
@@ -962,6 +974,92 @@ float CEsp::DistanceTo(Vector vecSrc, Vector vecDst)
 	return fDistance;
 }
 
+void CEsp::BacktrackingCross(IClientEntity* pEntity)
+{
+
+
+	studiohdr_t* pStudioHdr = Interfaces::ModelInfo->GetStudiomodel(pEntity->GetModel());
+
+	if (!pStudioHdr)
+		return;
+
+	Vector vParent, vChild, sParent, sChild;
+
+	for (int i = 0; i < Interfaces::EntList->GetHighestEntityIndex(); i++)
+	{
+		player_info_t pinfo;
+		if (pEntity && pEntity != hackManager.pLocal() && !pEntity->IsDormant())
+		{
+			if (Interfaces::Engine->GetPlayerInfo(i, &pinfo) && pEntity->IsAlive())
+			{
+				if (Menu::Window.LegitBotTab.AimbotBacktrack.GetState())
+				{
+					if (hackManager.pLocal()->IsAlive())
+					{
+						for (int t = 0; t < 12; ++t)
+						{
+							Vector screenbacktrack[64][12];
+
+							if (headPositions[i][t].simtime && headPositions[i][t].simtime + 1 > hackManager.pLocal()->GetSimulationTime())
+							{
+								if (Render::WorldToScreen(headPositions[i][t].hitboxPos, screenbacktrack[i][t]))
+								{
+									Interfaces::Surface->DrawSetColor(Color(255, 0, 0, 255));
+									Interfaces::Surface->DrawOutlinedRect(screenbacktrack[i][t].x, screenbacktrack[i][t].y, screenbacktrack[i][t].x + 2, screenbacktrack[i][t].y + 2);
+
+								}
+							}
+						}
+					}
+					else
+					{
+						memset(&headPositions[0][0], 0, sizeof(headPositions));
+					}
+				}
+				if (Menu::Window.RageBotTab.AccuracySpread.GetState())
+				{
+					/*if (hackManager.pLocal()->IsAlive())
+					{
+					Vector screenbacktrack[64];
+
+					if (backtracking->records[i].tick_count + 12 > Interfaces::Globals->tickcount)
+					{
+					if (Render::WorldToScreen(backtracking->records[i].headPosition, screenbacktrack[i]))
+					{
+
+					Interfaces::Surface->DrawSetColor(Color(255, 0, 0, 255));
+					Interfaces::Surface->DrawOutlinedRect(screenbacktrack[i].x, screenbacktrack[i].y, screenbacktrack[i].x + 2, screenbacktrack[i].y + 2);
+
+					}
+					}
+					}*/
+					if (hackManager.pLocal()->IsAlive())
+					{
+						for (int t = 0; t < 12; ++t)
+						{
+							Vector screenbacktrack[64];
+
+							if (backtracking->records[i].tick_count + 12 > Interfaces::Globals->tickcount)
+							{
+								if (Render::WorldToScreen(backtracking->records[i].headPosition, screenbacktrack[i]))
+								{
+
+									Interfaces::Surface->DrawSetColor(Color(255, 0, 0, 255));
+									Interfaces::Surface->DrawOutlinedRect(screenbacktrack[i].x, screenbacktrack[i].y, screenbacktrack[i].x + 2, screenbacktrack[i].y + 2);
+
+								}
+							}
+						}
+					}
+					else
+					{
+						memset(&backtracking->records[0], 0, sizeof(backtracking->records));
+					}
+				}
+			}
+		}
+	}
+}
 
 
 void DrawAA(Vector view ,bool &bSendPacket)
@@ -991,20 +1089,26 @@ void DrawAA(Vector view ,bool &bSendPacket)
 
 void DrawTrace()
 {
-	Vector src3, dst3, r, f, lby, src, dst;
+	
+	Vector src3, dst3, r, f, lby, src, dst, rx, fx;
 	trace_t treal;
 	trace_t tfake;
+	trace_t trealx;
+	trace_t tfakex;
 	trace_t tlby;
 	Ray_t ray;
 	CTraceFilter filter;
 	IClientEntity* plocal = hackManager.pLocal();
 
+
+	//-------------------------------------------------------------------
+
 	filter.pSkip = hackManager.pLocal();
 	src3 = hackManager.pLocal()->GetEyePosition();
 	AngleVectors(QAngle(0, freal, 0), &r);
-	dst3 = src3 + (r * 100.f);
+	dst3 = src3 + (r * 60.f);
 	ray.Init(src3, dst3);
-	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &treal);
+	Interfaces::Trace->TraceRay(ray, 0xffffffff, &filter, &treal);
 
 	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(treal.endpos, dst))
 		return;
@@ -1013,13 +1117,14 @@ void DrawTrace()
 	sprintf(charreal, "%f", freal);
 	Render::Text(dst.x, dst.y, Color(0, 255, 0, 255), Render::Fonts::Slider, (charreal));
 	
+	//-------------------------------------------------------------------
 
 	filter.pSkip = hackManager.pLocal();
 	src3 = hackManager.pLocal()->GetEyePosition();
 	AngleVectors(QAngle(0, ffake, 0), &f);
-	dst3 = src3 + (f * 100.f);
+	dst3 = src3 + (f * 60.f);
 	ray.Init(src3, dst3);
-	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tfake);
+	Interfaces::Trace->TraceRay(ray, 0xffffffff, &filter, &tfake);
 
 	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tfake.endpos, dst))
 		return;
@@ -1027,14 +1132,15 @@ void DrawTrace()
 	char charfake[3];
 	sprintf(charfake, "%f", ffake);
 	Render::Text(dst.x, dst.y, Color(255, 0, 0, 255), Render::Fonts::Slider, (charfake));
-	
+
+	//-------------------------------------------------------------------
+
 	filter.pSkip = hackManager.pLocal();
 	src3 = hackManager.pLocal()->GetEyePosition();
 	AngleVectors(QAngle(0, plocal->GetLowerBodyYaw(), 0), &lby);
 	dst3 = src3 + (lby * 100.f);
 	ray.Init(src3, dst3);
-	Interfaces::Trace->TraceRay(ray, MASK_SOLID, &filter, &tlby);
-
+	Interfaces::Trace->TraceRay(ray, 0xffffffff, &filter, &tlby);
 	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tlby.endpos, dst))
 		return;
 	Render::Line(src.x, src.y, dst.x, dst.y, Color(0, 0, 200, 255));
@@ -1042,7 +1148,36 @@ void DrawTrace()
 	sprintf(charlby, "%f", lby);
 	Render::Text(dst.x, dst.y, Color(0, 0, 200, 255), Render::Fonts::Slider, (charlby));
 
-	
+	//-------------------------------------------------------------------
+	filter.pSkip = hackManager.pLocal();
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(frealx, 0, 0), &rx);
+	dst3 = src3 + (rx * 60.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, 0xffffffff, &filter, &trealx);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(trealx.endpos, dst))
+		return;
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(0, 255, 0, 255));
+	char charrealx[3];
+	sprintf(charrealx, "%f", frealx);
+	Render::Text(dst.x, dst.y, Color(0, 255, 0, 255), Render::Fonts::Slider, (charrealx));
+
+	//-------------------------------------------------------------------
+
+	filter.pSkip = hackManager.pLocal();
+	src3 = hackManager.pLocal()->GetEyePosition();
+	AngleVectors(QAngle(ffakex, 0, 0), &fx);
+	dst3 = src3 + (fx * 60.f);
+	ray.Init(src3, dst3);
+	Interfaces::Trace->TraceRay(ray, 0xffffffff, &filter, &tfakex);
+
+	if (!Render::WorldToScreen(src3, src) || !Render::WorldToScreen(tfakex.endpos, dst))
+		return;
+	Render::Line(src.x, src.y, dst.x, dst.y, Color(255, 0, 0, 255));
+	char charfakex[3];
+	sprintf(charfakex, "%f", ffakex);
+	Render::Text(dst.x, dst.y, Color(255, 0, 0, 255), Render::Fonts::Slider, (charfakex));
 	
 	
 	

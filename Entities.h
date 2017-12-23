@@ -4,6 +4,7 @@
 #include "ClientRecvProps.h"
 #include "offsets.h"
 #include "Vector.h"
+#include "sim.h"
 
 #define TEAM_CS_T 2
 #define TEAM_CS_CT 3
@@ -669,6 +670,7 @@ public:
 	CNETVAR_FUNC(int*, GetPointerFlags, 0xE456D580); //m_fFlags
 	CNETVAR_FUNC(HANDLE, GetOwnerHandle, 0xC32DF98D); //m_hOwner
 	CNETVAR_FUNC(int, GetMaxHealth, 0xC52E1C28); //m_iMaxHealth
+	CPNETVAR_FUNC(Vector*, GetOriginPtr, 0x1231CE10); //m_vecOrigin
 	CNETVAR_FUNC(int, GetHealth, 0xA93054E3); //m_iHealth
 	CNETVAR_FUNC(bool, IsDefusing, 0xA2C14106); //m_bIsDefusing
 	CNETVAR_FUNC(float, GetFlashDuration, 0x4B5938D5); //m_flFlashDuration
@@ -738,6 +740,12 @@ public:
 	{
 		static int offsPoseParam = GET_NETVAR(XorStr("CBaseAnimating"), XorStr("m_flPoseParameter"));
 		return *reinterpret_cast<float*>(reinterpret_cast<uintptr_t>(this) + offsPoseParam + sizeof(float) * idx);
+	}
+
+	int IClientEntity::GetChokedTicks() {
+		if (this->GetSimulationTime() > globalsh.OldSimulationTime[this->GetIndex()])
+			return fabs(this->GetSimulationTime() - globalsh.OldSimulationTime[this->GetIndex()]);
+		return 0;
 	}
 
 	float getCycle()
