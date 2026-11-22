@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Book a Session | T.S Essentials</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Enquire about an equine sports massage and bodywork session with T.S Essentials.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="T.S Essentials">
+<meta property="og:title" content="Book a Session | T.S Essentials">
+<meta property="og:description" content="Enquire about an equine sports massage and bodywork session with T.S Essentials.">
+<meta property="og:image" content="images/logo-full.jpg">
+<meta name="theme-color" content="#f7f1d8">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,500;0,600;1,500&family=Alegreya+Sans:wght@400;500;700&family=Cinzel:wght@500;600&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+<script>document.documentElement.classList.add("js");</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="T.S Essentials, home">
+      <img src="images/emblem-small.webp" width="52" height="52" alt="">
+      <span>
+        <span class="brand__name">T.S Essentials</span>
+        <span class="brand__sub">Equine Bodywork</span>
+      </span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Main">
+      <ul>
+        <li><a href="approach.html">The Approach</a></li>
+        <li><a href="sessions.html">Sessions</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="sessions.html#faq">FAQ</a></li>
+        <li><a class="nav__cta" href="contact.html" aria-current="page">Book a Session</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<section class="page-head">
+  <img src="images/farm-sunset.jpg" srcset="images/farm-sunset-sm.jpg 900w, images/farm-sunset.jpg 1920w" sizes="100vw" alt="" style="object-position: 60% 60%;">
+  <div class="wrap">
+    <div class="page-head__inner">
+      <p class="eyebrow">Contact</p>
+      <h1>Book a session</h1>
+      <p>Tell me a little about your horse and I&rsquo;ll be in touch to arrange a visit.</p>
+    </div>
+  </div>
+</section>
+<div class="knot knot--thin" role="presentation"></div>
+
+<main id="main">
+
+<section class="section">
+  <div class="wrap contact-grid">
+    <form class="form" id="enquiry-form" data-email="[Email Address]" novalidate>
+      <fieldset>
+        <legend>About you</legend>
+        <div class="row">
+          <div class="field">
+            <label for="owner-name">Your name <span class="req" aria-hidden="true">*</span></label>
+            <input id="owner-name" name="owner-name" type="text" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="owner-phone">Phone</label>
+            <input id="owner-phone" name="owner-phone" type="tel" autocomplete="tel">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="owner-email">Email <span class="req" aria-hidden="true">*</span></label>
+            <input id="owner-email" name="owner-email" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="location">Where is your horse kept? <span class="req" aria-hidden="true">*</span></label>
+            <input id="location" name="location" type="text" required>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>About your horse</legend>
+        <div class="row">
+          <div class="field">
+            <label for="horse-name">Horse&rsquo;s name <span class="req" aria-hidden="true">*</span></label>
+            <input id="horse-name" name="horse-name" type="text" required>
+          </div>
+          <div class="field">
+            <label for="horse-age">Age</label>
+            <input id="horse-age" name="horse-age" type="text" inputmode="numeric">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="horse-breed">Breed or type</label>
+            <input id="horse-breed" name="horse-breed" type="text">
+          </div>
+          <div class="field">
+            <label for="horse-work">Work or discipline</label>
+            <input id="horse-work" name="horse-work" type="text" placeholder="e.g. hacking, eventing, retired">
+          </div>
+        </div>
+        <div class="field">
+          <label for="vet">Vet practice</label>
+          <input id="vet" name="vet" type="text">
+          <span class="hint">So I can work alongside your vet.</span>
+        </div>
+        <div class="field">
+          <label for="message">What would you like help with? <span class="req" aria-hidden="true">*</span></label>
+          <textarea id="message" name="message" required placeholder="Anything you&rsquo;ve noticed, recent injuries or treatment, and what you&rsquo;d like from a session."></textarea>
+        </div>
+      </fieldset>
+
+      <div class="stack" style="gap: 0.6rem;">
+        <div class="actions"><button class="btn btn--primary" type="submit">Continue to email</button></div>
+        <p class="hint" style="font-size: 0.95rem; color: var(--ink-soft);">This opens your email app with your answers filled in, ready for you to send. Fields marked <span class="req">*</span> are required.</p>
+      </div>
+      <p class="form__status" id="form-status" role="status" hidden></p>
+    </form>
+
+    <aside class="stack" style="gap: 1.5rem;">
+      <div class="aside-card">
+        <div class="knot knot--thin" role="presentation"></div>
+        <div class="aside-card__body">
+          <h2 style="font-size: var(--step-2);">Contact details</h2>
+          <dl>
+            <div><dt>Phone</dt><dd><a href="tel:[Phone Number]">[Phone Number]</a></dd></div>
+            <div><dt>Email</dt><dd><a href="mailto:[Email Address]">[Email Address]</a></dd></div>
+            <div><dt>Area covered</dt><dd>[Your Area]</dd></div>
+          </dl>
+          <p>After you get in touch, I&rsquo;ll contact you to talk through your horse&rsquo;s needs and find a time that suits. I&rsquo;ll also ask for your vet&rsquo;s details.</p>
+        </div>
+      </div>
+      <div class="notice" role="note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v5.5"/><circle cx="12" cy="16.5" r="0.6" fill="currentColor"/></svg>
+    <div>
+      <h3>Lame or injured horse?</h3>
+      <p>Please contact your vet first. Bodywork can support their treatment once your horse has been examined.</p>
+    </div>
+  </div>
+    </aside>
+  </div>
+</section>
+
+</main>
+<div class="knot" role="presentation"></div>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <img src="images/emblem-small.webp" width="72" height="72" alt="">
+        <div>
+          <span class="brand__name">T.S Essentials</span>
+          <p>Equine sports massage and bodywork, with positional release and aromatherapy, brought to your yard.</p>
+        </div>
+      </div>
+      <div>
+        <h2>Explore</h2>
+        <ul>
+          <li><a href="approach.html">The Approach</a></li>
+          <li><a href="sessions.html">Sessions</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="sessions.html#faq">FAQ</a></li>
+          <li><a href="contact.html">Book a Session</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Get in touch</h2>
+        <ul>
+          <li><a href="tel:[Phone Number]">[Phone Number]</a></li>
+          <li><a href="mailto:[Email Address]">[Email Address]</a></li>
+          <li>Covering [Your Area]</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-base">
+      <p>Bodywork supports veterinary care and is never a substitute for it. If your horse is lame, injured or unwell, please contact your vet first.</p>
+      <p>&copy; T.S Essentials</p>
+    </div>
+  </div>
+</footer>
+<script src="js/main.js" defer></script>
+</body>
+</html>
