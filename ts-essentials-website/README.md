@@ -7,33 +7,29 @@ A five-page static website for T.S Essentials, an equine sports massage and body
 | File | Page |
 | --- | --- |
 | `index.html` | Home |
-| `approach.html` | The Approach: positional release, modality stacking, aromatherapy |
-| `sessions.html` | Sessions: what to expect, before and after, FAQ |
-| `about.html` | About you |
-| `contact.html` | Book a Session (enquiry form) |
+| `services.html` | Services: positional release, sports massage, structural alignment, modality stacking, aromatherapy |
+| `sessions.html` | Sessions: what to expect, preparation, aftercare, FAQ |
+| `about.html` | About: six years in the industry, training under Jeffra Sinclair |
+| `contact.html` | Book a Session (request form) |
 
 ## Before you publish: fill in your details
 
-These placeholders appear in square brackets. Use find-and-replace across all five `.html` files:
+Two placeholders remain. Use find-and-replace across all five `.html` files:
 
 | Placeholder | Replace with |
 | --- | --- |
-| `[Your Name]` | Your name (About page) |
-| `[Your Area]` | The area you cover, e.g. a county or region |
-| `[Phone Number]` | Your phone number. Also replace it inside `href="tel:[Phone Number]"`, written without spaces (e.g. `tel:+353871234567`) |
-| `[Email Address]` | Your email address. It's also used by the enquiry form |
-
-On `about.html`, also replace:
-
-- The paragraph that starts `[Add a few lines about your own background...`
-- The three bracketed lines under **Training & qualifications**
-
-On `approach.html`, check the **Techniques I may draw on** list and change it to match the techniques you actually use.
+| `[Phone Number]` | Your phone number. Inside `href="tel:[Phone Number]"`, write it without spaces or dashes (e.g. `tel:+13525550123`) |
+| `[Email Address]` | Your email address. The request form also sends to it |
 
 ### Recommended
 
 - Add a photo of yourself at work on the About page. Save it in `images/` and change the `src` of the first image in `about.html`.
+- If you hold specific certifications or liability insurance, add them to the "At a glance" list on the About page.
 - Over time, swap the stock photos for photos of horses you've worked on (with their owners' permission).
+
+### A note on wording
+
+The site deliberately uses "structural alignment", "bodywork", and "sessions", and avoids "chiropractic", "adjustment", "diagnose", and "treat". The Florida Veterinary Medical Association's position is that animal chiropractic falls outside a non-veterinarian's authority, and diagnosing or treating animal injury is veterinary practice under Chapter 474, Florida Statutes. Keep that wording if you edit the copy. This isn't legal advice; for certainty, check with a Florida veterinary attorney or the Florida Board of Veterinary Medicine.
 
 ## The enquiry form
 

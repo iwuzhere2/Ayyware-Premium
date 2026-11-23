@@ -665,3 +665,14 @@ body::before {
   position: absolute !important; width: 1px; height: 1px;
   padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
 }
+
+/* Four-service band: rules above each item rather than between columns */
+.pillars--four { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2.5rem 2rem; }
+.pillars--four .pillar,
+.pillars--four .pillar:first-child {
+  padding: 1.5rem 0 0;
+  border-left: 0;
+  border-top: 1px solid rgba(243, 236, 210, 0.25);
+}
+@media (max-width: 1080px) { .pillars--four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .pillars--four { grid-template-columns: minmax(0, 1fr); } }

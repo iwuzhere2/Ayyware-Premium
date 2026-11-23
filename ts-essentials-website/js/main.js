@@ -37,18 +37,18 @@
 
     var to = form.getAttribute("data-email") || "";
     var horse = value("horse-name");
-    var subject = "Session enquiry" + (horse ? " for " + horse : "");
+    var subject = "Session request" + (horse ? " for " + horse : "");
     var lines = [
       "Name: " + value("owner-name"),
       "Email: " + value("owner-email"),
       "Phone: " + value("owner-phone"),
-      "Location / yard: " + value("location"),
+      "Barn location: " + value("location"),
       "",
       "Horse's name: " + horse,
       "Age: " + value("horse-age"),
-      "Breed / type: " + value("horse-breed"),
-      "Work / discipline: " + value("horse-work"),
-      "Vet practice: " + value("vet"),
+      "Breed: " + value("horse-breed"),
+      "Discipline: " + value("horse-work"),
+      "Veterinarian: " + value("vet"),
       "",
       "What I'd like help with:",
       value("message")
@@ -60,7 +60,7 @@
 
     status.hidden = false;
     status.textContent = "Your email app should now open with your details filled in. " +
-      "Press send there to get your enquiry to me. If nothing opens, email me directly at " +
+      "Press send in your email app to submit your request. If nothing opens, email me directly at " +
       to + ".";
     window.location.href = href;
   });
