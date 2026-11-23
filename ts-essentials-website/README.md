@@ -1,15 +1,15 @@
 # T.S Essentials website
 
-A five-page static website for T.S Essentials, an equine sports massage and bodywork business. It's plain HTML, CSS and a little JavaScript, so it runs on any web host with no build step.
+A five-page static website for T.S Essentials, a holistic equine bodywork business in Eustis, Florida. It's plain HTML, CSS and a little JavaScript, so it runs on any web host with no build step.
 
 ## Pages
 
 | File | Page |
 | --- | --- |
 | `index.html` | Home |
-| `services.html` | Services: positional release, sports massage, structural alignment, modality stacking, aromatherapy |
+| `services.html` | Services: holistic approach, positional release, sports massage, structural alignment, modality stacking, aromatherapy |
 | `sessions.html` | Sessions: what to expect, preparation, aftercare, FAQ |
-| `about.html` | About: six years in the industry, training under Jeffra Sinclair |
+| `about.html` | About: holistic background, six years in the industry, training under Jeffra Sinclair |
 | `contact.html` | Book a Session (request form) |
 
 ## Before you publish: fill in your details
