@@ -29,13 +29,13 @@ Two placeholders remain. Use find-and-replace across all five `.html` files:
 
 ### A note on wording
 
-The site deliberately uses "structural alignment", "bodywork", and "sessions", and avoids "chiropractic", "adjustment", "diagnose", and "treat". The Florida Veterinary Medical Association's position is that animal chiropractic falls outside a non-veterinarian's authority, and diagnosing or treating animal injury is veterinary practice under Chapter 474, Florida Statutes. Keep that wording if you edit the copy. This isn't legal advice; for certainty, check with a Florida veterinary attorney or the Florida Board of Veterinary Medicine.
+The site describes your work as "structural alignment", "bodywork", and "sessions". It never describes it as chiropractic, adjustments, diagnosis, or treatment; those words appear only in the disclaimers that say what the work is not. The Florida Veterinary Medical Association's position is that animal chiropractic falls outside a non-veterinarian's authority, and diagnosing or treating animal injury is veterinary practice under Chapter 474, Florida Statutes. Keep that wording if you edit the copy. This isn't legal advice; for certainty, check with a Florida veterinary attorney or the Florida Board of Veterinary Medicine.
 
-## The enquiry form
+## The request form
 
 The form doesn't need a server. When someone presses **Continue to email**, it opens their email app with their answers filled in, addressed to the email you set above. They then press send.
 
-If you'd prefer enquiries to arrive without the visitor using their own email app, you can connect the form to a form service (for example Formspree or Netlify Forms) later.
+If you'd prefer requests to arrive without the visitor using their own email app, you can connect the form to a form service (for example Formspree or Netlify Forms) later.
 
 ## Hosting
 
